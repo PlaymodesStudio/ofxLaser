@@ -38,7 +38,7 @@ void DacIDN :: setup(string ip) {
 	if(connected) {
 		
 		startThread();
-		getPocoThread().setPriority(Poco::Thread::PRIO_HIGHEST);
+		//getPocoThread().setPriority(Poco::Thread::PRIO_HIGHEST);
 	}
 }
 
