@@ -467,7 +467,9 @@ void ManagerBase::initAndLoadSettings() {
         ofLogError("ofxLaser::Manager::initAndLoadSettings() called twice - NB you no longer need to call this in your code, it happens automatically");
         return ;
     }
+#ifndef OFXLASER_DISABLE_GUI
     ofxLaser::UI::setupGui();
+#endif
    
 	params.setName("Laser");
 	params.add(globalBrightness.set("Global brightness", 0.2,0,1));

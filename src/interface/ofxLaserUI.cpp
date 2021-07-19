@@ -4,6 +4,7 @@
 //
 //  Created by Seb Lee-Delisle on 23/03/2021.
 //
+#ifndef OFXLASER_DISABLE_GUI
 
 #include "ofxLaserUI.h"
 
@@ -300,4 +301,4 @@ void UI::drawDashedLine(glm::vec3 p1, glm::vec3 p2){
    ofPopStyle();
 
 }
-
+#endif

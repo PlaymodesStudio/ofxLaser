@@ -58,7 +58,7 @@ bool Manager::isAnyLaserSelected() {
 
 
 void Manager:: drawUI(bool expandPreview){
-    
+#ifndef OFXLASER_DISABLE_GUI
     drawPreviews(expandPreview);
     
     ofxLaser::UI::updateGui();
@@ -66,6 +66,7 @@ void Manager:: drawUI(bool expandPreview){
     
     drawLaserGui();
     ofxLaser::UI::render();
+#endif
     
 }
 
@@ -390,6 +391,7 @@ glm::vec2 Manager::screenToLaserInput(glm::vec2& pos){
 }
 
 void Manager::drawLaserGui() {
+#ifndef OFXLASER_DISABLE_GUI
     
     ofxLaser::ManagerBase& laserManager = *this;
     
@@ -711,12 +713,12 @@ void Manager::drawLaserGui() {
         
      
     }
-    
+#endif
 }
 
 
 void Manager :: drawLaserSettingsPanel(ofxLaser::Laser* laser, float laserpanelwidth, float spacing, float x) {
-    
+#ifndef OFXLASER_DISABLE_GUI
     UI::startWindow(laser->getLabel(), ImVec2(x, spacing), ImVec2(laserpanelwidth,0), ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |ImGuiWindowFlags_AlwaysAutoResize, true, (bool*)&showLaserSettings.get());
     
    
@@ -1220,5 +1222,6 @@ void Manager :: drawLaserSettingsPanel(ofxLaser::Laser* laser, float laserpanelw
     
     //ImGui::End();
     UI::endWindow();
+#endif
 }
 

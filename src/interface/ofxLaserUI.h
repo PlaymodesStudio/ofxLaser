@@ -5,6 +5,8 @@
 //  Created by Seb Lee-Delisle on 23/03/2021.
 //
 
+#ifndef OFXLASER_DISABLE_GUI
+
 #pragma once
 #include "ofxImGui.h"
 #include "ofMain.h"
@@ -180,3 +182,4 @@ class UI {
 
 
 }
+#endif

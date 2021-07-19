@@ -100,7 +100,7 @@ void ZoneTransform :: setVisible(bool warpvisible){
     visible = warpvisible;
 }
 void ZoneTransform::draw(string label) {
-	
+#ifndef OFXLASER_DISABLE_GUI
     if(!visible) return ;
 	ofPushMatrix();
 	ofTranslate(offset);
@@ -140,6 +140,7 @@ void ZoneTransform::draw(string label) {
 		}
 	}
 	ofPopMatrix();
+#endif
 }
 
 ofPoint ZoneTransform::getCentre() {

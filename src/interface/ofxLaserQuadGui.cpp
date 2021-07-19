@@ -129,11 +129,12 @@ void QuadGui :: draw() {
 	//glm::vec3 p2 = glm::mix((glm::vec3)handles[0],(glm::vec3)handles[2], 0.1);
     glm::vec3 shift(0.5,0.5,0);
     if(editable) {
-		
+#ifndef OFXLASER_DISABLE_GUI
         UI::drawDashedLine(handles[1]+shift, handles[3]+shift);
         UI::drawDashedLine(handles[3]+shift, handles[2]+shift);
         UI::drawDashedLine(handles[0]+shift, handles[1]+shift);
         UI::drawDashedLine(handles[2]+shift, handles[0]+shift);
+#endif
 
     } else {
         ofSetColor(lineColour*0.5);
