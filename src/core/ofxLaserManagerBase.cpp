@@ -636,6 +636,8 @@ ofPoint ManagerBase::gLProject(ofPoint p) {
 }
 ofPoint ManagerBase::gLProject( float x, float y, float z ) {
 	
+	if(ofIsGLProgrammableRenderer()) return ofPoint(x, y, 0.0f);
+
     ofRectangle rViewport = ofGetCurrentViewport();
 	
 	glm::mat4 modelview, projection;
