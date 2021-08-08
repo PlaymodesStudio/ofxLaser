@@ -9,7 +9,9 @@
 using namespace ofxLaser;
 
 QuadGui::QuadGui() {
+#ifndef OFXLASER_DISABLE_GUI
     initListeners();
+#endif
     
     visible = true;
     isDirty=true;
@@ -29,7 +31,9 @@ QuadGui::QuadGui() {
     
 }
 QuadGui::~QuadGui() {
+#ifndef OFXLASER_DISABLE_GUI
     if(initialised) removeListeners();
+#endif
     
 }
 

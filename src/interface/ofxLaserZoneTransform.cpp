@@ -18,7 +18,9 @@ ZoneTransform::ZoneTransform() {
 
 	scale = 1;
 	offset.set(0,0);
+#ifndef OFXLASER_DISABLE_GUI
 	initListeners();
+#endif
 	editable = true;
 	isDirty = true;
 	selected = false;
@@ -52,7 +54,9 @@ void ZoneTransform :: paramChanged(ofAbstractParameter& e) {
     
 }
 ZoneTransform::~ZoneTransform() {
+#ifndef OFXLASER_DISABLE_GUI
     removeListeners();
+#endif
     xDivisionsNew.removeListener(this, &ZoneTransform::divisionsChanged);
     yDivisionsNew.removeListener(this, &ZoneTransform::divisionsChanged);
     ofRemoveListener(params.parameterChangedE(), this, &ZoneTransform::paramChanged);
@@ -68,7 +72,7 @@ void ZoneTransform::init(ofRectangle& srcRect) {
     
         // TODO - better default???
 
-        ofRectangle destRect(200,200,400,400);
+        ofRectangle destRect(0,0,800,800);
     
         //= srcRect;
 		//destRect.scale(srcwidth/800, srcheight/800);
