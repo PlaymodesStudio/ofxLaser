@@ -42,7 +42,7 @@ void Laser::setDac(DacBase* newdac){
         dac = newdac;
         newdac->setPointsPerSecond(pps);
         dacId = dac->getId();
-        armed = false; // automatically calls setArmed because of listener on parameter
+        armed = true; // automatically calls setArmed because of listener on parameter
     }
     
 }
