@@ -439,7 +439,7 @@ bool ZoneTransform :: mouseMoved(ofMouseEventArgs &e){
     mousePos = e;
     mousePos-=offset;
     mousePos/=scale;
-
+    return true;
 }
 
 bool ZoneTransform :: mousePressed(ofMouseEventArgs &e){
