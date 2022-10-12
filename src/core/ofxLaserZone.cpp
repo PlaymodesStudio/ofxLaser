@@ -62,13 +62,14 @@ bool Zone::update() {
 
 bool Zone::addShape(Shape* s){
 	
-	if(s->intersectsRect(rect)){
-		shapes.push_back(s);
-		return true;
-	} else {
-		return false;
-	}
-	
+//	if(s->intersectsRect(rect)){
+//		shapes.push_back(s);
+//		return true;
+//	} else {
+//		return false;
+//	}
+    shapes.push_back(s);
+    return true;
 }
 
 
