@@ -257,7 +257,7 @@ void ManagerBase::drawPoly(const ofPolyline & poly, std::vector<ofColor>& colour
 	// (useful for dynamically generated lines, or empty lines
 	// that are often found in poorly compiled SVG files)
 	
-	if((poly.size()==0)||(poly.getPerimeter()<0.1)) return;
+    if((poly.size()==0)) return;//||(poly.getPerimeter()<0.1)) return;
 	
 	
 	ofPolyline& polyline = tmpPoly;
