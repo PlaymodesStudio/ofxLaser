@@ -210,15 +210,20 @@ bool DacEtherdream:: sendFrame(const vector<Point>& points){
 			for(size_t i= 0; i<points.size(); i++) {
 				
 				const Point& p2 = points[i];
+                
+                p1.x = ofMap(p2.x,0,800,ETHERDREAM_MIN, ETHERDREAM_MAX);
+                p1.y = ofMap(p2.y,800,0,ETHERDREAM_MIN, ETHERDREAM_MAX); // Y is UP
 
-				float x = p2.x / 800.0;
-				float y = p2.y / 800.0;
-
-				float barrelAmount = 0.035 * (1 + cos((3.1416 * y) + 3.1416 / 2.0));
-				float x2 = ofMap(x, 0.0f, 1.0f, barrelAmount, 1 - barrelAmount);
-
-				p1.x = ofMap(x2, 0, 1.0,ETHERDREAM_MIN, ETHERDREAM_MAX, true);
-				p1.y = ofMap(y, 1.0 , 0,ETHERDREAM_MIN, ETHERDREAM_MAX, true); // Y is UP
+//              PIN CUSHION DISTORTION SIMPLE CORRECTION
+                
+//              float x = p2.x / 800.0;
+//				float y = p2.y / 800.0;
+//
+//				float barrelAmount = 0.035 * (1 + cos((3.1416 * y) + 3.1416 / 2.0));
+//				float x2 = ofMap(x, 0.0f, 1.0f, barrelAmount, 1 - barrelAmount);
+//
+//				p1.x = ofMap(x2, 0, 1.0,ETHERDREAM_MIN, ETHERDREAM_MAX, true);
+//				p1.y = ofMap(y, 1.0 , 0,ETHERDREAM_MIN, ETHERDREAM_MAX, true); // Y is UP
 				p1.r = p2.r/255.0f*65535;
 				p1.g = p2.g/255.0f*65535;
 				p1.b = p2.b/255.0f*65535;
