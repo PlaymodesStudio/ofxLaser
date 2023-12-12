@@ -925,23 +925,23 @@ bool DacEtherdream :: sendBytes(const uint8_t* buffer, int length) {
 	}
 	catch (Poco::Exception& exc) {
 		//Handle your network errors.
-		cerr << "sendBytes : Network error: " << exc.displayText() << endl;
+        std::cerr << "sendBytes : Network error: " << exc.displayText() << endl;
 		networkerror = true;
 		failed = true;
 	}
 	catch (Poco::TimeoutException& exc) {
 		//Handle your network errors.
-		cerr << "sendBytes : Timeout error: " << exc.displayText() << endl;
+        std::cerr << "sendBytes : Timeout error: " << exc.displayText() << endl;
 		//	isOpen = false;
 		failed = true;
 	}
 	if(numBytesSent!=length) {
 		//do something!
-		cerr << "send fail, fewer bytes sent than expected : "<< numBytesSent << endl;
+        std::cerr << "send fail, fewer bytes sent than expected : "<< numBytesSent << endl;
 		failed = true;
 	} else if (numBytesSent<0) {
 		//do something!
-		cerr << "send fail, sendBytes returned : "<< numBytesSent << endl;
+        std::cerr << "send fail, sendBytes returned : "<< numBytesSent << endl;
 		failed = true;
 	}
 	
