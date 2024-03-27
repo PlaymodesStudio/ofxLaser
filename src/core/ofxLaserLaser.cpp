@@ -883,29 +883,11 @@ void Laser::send(ofPixels* pixels, float masterIntensity) {
     
     
 	int targetNumPoints;
+    lastPoints = laserPoints;
     
 	// TODO add system to speed up if too much stuff to draw
 	if (syncToTargetFramerate) {
 		
-		targetNumPoints = round((float)pps / targetFramerate);
-		
-		if(syncShift!=0) {
-			targetNumPoints+=syncShift;
-			if(!ofGetMousePressed()) syncShift = 0;
-		}
-		
-		while (laserPoints.size() < targetNumPoints) {
-			addPoint(laserHomePosition, ofColor::black);
-		}
-	}
-	
-	processPoints(masterIntensity);
-	
-	if(syncToTargetFramerate && (laserPoints.size()!=targetNumPoints)) {
-	
-		ofLogError("syncToTargetFramerate failed! " + ofToString(targetNumPoints)+ " " + ofToString(laserPoints.size()));
-	}
-	
 	dac->sendFrame(laserPoints);
     numPoints = (int)laserPoints.size();
 	
