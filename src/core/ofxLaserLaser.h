@@ -90,6 +90,8 @@ class Laser {
     int getPointRate();
     float getFrameRate();
     
+    vector<Point> getLastPoints(){return lastPoints;};
+    
     // DAC
     
     string getDacLabel() ;
@@ -203,6 +205,7 @@ class Laser {
     
      
     vector<Point> laserPoints;
+    vector<Point> lastPoints;
     vector<Point> sparePoints;
     vector<Point> sparePoints2;
     unsigned long frameCounter = 0;
