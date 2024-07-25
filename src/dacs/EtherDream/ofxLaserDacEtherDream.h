@@ -63,6 +63,13 @@ public:
     // information about the device, IP address, MAC address, version number etc
     EtherDreamData etherDreamData;
     
+    EtherDreamData getEtherDreamData(); 
+    int getLastReportedBufferFullness();
+    string getEtherDreamStateString();
+    
+    
+    
+    
 protected:
   
     // ofThread functions
@@ -123,7 +130,7 @@ protected:
 
     
     int queuedPPSChangeMessages;
-    bool connected;
+    std::atomic<bool> connected;
    // int maxLatencyMS;
 
    // bool newFrame = false;

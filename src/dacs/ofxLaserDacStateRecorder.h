@@ -37,12 +37,16 @@ class DacStateRecorder {
     void getDataRateValuesForTime(uint64_t starttimemicros, uint64_t endtimemicros, int numvalues) ;
    
     
+    void getLatencyValues(int numvalues, int widthpervalue);
+    
+    
+    
     deque<DacStateAtTime*> stateHistory;
     vector<DacStateAtTime*> stateHistoryForTimePeriod;
     ofThreadChannel<DacStateAtTime*> stateChannel;
-    
+    int maxRecordCount = 10000; 
     float values[10000]; // used to store plot data, temporary storage
-    bool recording; 
+    std::atomic<bool> recording; 
     
 };
 

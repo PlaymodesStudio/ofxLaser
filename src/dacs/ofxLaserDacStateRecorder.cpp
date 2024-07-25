@@ -34,7 +34,7 @@ void DacStateRecorder :: update() {
     while(stateChannel.tryReceive(dacState)) {
         stateHistory.push_back(dacState);
     }
-    while(stateHistory.size()>=1000) {
+    while(stateHistory.size()>=maxRecordCount) {
         DacStateAtTime* spare = stateHistory.front();
         stateHistory.pop_front();
         delete spare; // recycle?
@@ -153,7 +153,6 @@ void DacStateRecorder :: getLatencyValuesForTime(uint64_t starttimemicros, uint6
         
         DacStateAtTime* bufferstate = stateHistoryForTimePeriod[bufferIndex];
         
-        
         for (int i =0; i<numvalues; i++) {
             uint64_t timeMicros = visibledurationmicros;
             timeMicros *= i;
@@ -174,5 +173,22 @@ void DacStateRecorder :: getLatencyValuesForTime(uint64_t starttimemicros, uint6
             
         }
     }
+    
+}
+
+
+void DacStateRecorder :: getLatencyValues(int numvalues, int widthpervalue) {
+   
+    int startindex = stateHistory.size() - (numvalues/widthpervalue);
+    int maxvalue = stateHistory.size()-1;
+    
+    for (int i =0; i<numvalues; i++) {
+        
+        int index = ofClamp(startindex + (i/widthpervalue), 0, maxvalue);
+       
+        values[i] = (maxvalue ==-1) ? 0 : stateHistory[index]->roundTripTime/1000.0f;
+        
+    }
+    
     
 }

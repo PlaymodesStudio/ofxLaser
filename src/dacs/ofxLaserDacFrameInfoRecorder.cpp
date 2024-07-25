@@ -12,11 +12,12 @@ DacFrameInfoRecorder :: DacFrameInfoRecorder() {
 }
 
 void DacFrameInfoRecorder :: recordFrameInfoThreadSafe (uint64_t createdtimemicros, uint64_t senttimemicros, uint32_t numpoints, int repeatcount, bool skipped) {
-    
+    if(!recording) return;
     FrameAtTime* frameInfoPointer = new FrameAtTime();
     FrameAtTime& frameInfo = *frameInfoPointer;
     frameInfo.createdTimeMicros = createdtimemicros;
     frameInfo.sentTimeMicros = senttimemicros;
+    frameInfo.frameLatencyMicros = senttimemicros-createdtimemicros;
     frameInfo.numPoints = numpoints;
     frameInfo.repeatCount = repeatcount;
     frameInfo.skipped = skipped;
@@ -85,7 +86,7 @@ void DacFrameInfoRecorder :: getFrameLatencyValuesForTime(uint64_t starttimemicr
                 bufferIndex++;
                 frameInfo = (frameHistoryForTimePeriod[bufferIndex]);
                 //buffersize = 5000;
-                if(!frameInfo->skipped) latencyMicros = frameInfo->sentTimeMicros-frameInfo->createdTimeMicros;
+                if(!frameInfo->skipped) latencyMicros = frameInfo->frameLatencyMicros; 
             }
             
             //buffersize = (float)bufferstate->buffer;
@@ -95,6 +96,27 @@ void DacFrameInfoRecorder :: getFrameLatencyValuesForTime(uint64_t starttimemicr
         }
     }
     
+    
+}
+void DacFrameInfoRecorder :: getFrameLatencyValues( int numvalues, int widthpervalue){
+    
+    int startindex = frameHistory.size() - (numvalues/widthpervalue);
+    int maxvalue = frameHistory.size()-1;
+    int latencyMicros = 0;
+    for (int i =0; i<numvalues; i++) {
+        
+        int index = ofClamp(startindex + (i/widthpervalue), 0, maxvalue);
+        
+        if(maxvalue >-1) {
+            FrameAtTime* frameInfo =frameHistory[index];
+            
+            if(!frameInfo->skipped) latencyMicros = frameInfo->frameLatencyMicros;
+            values[i] = latencyMicros;
+        } else {
+            values[i] = 0;
+        }
+        
+    }
     
 }
 

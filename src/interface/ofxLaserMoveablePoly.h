@@ -11,6 +11,7 @@
 #include "ofMain.h"
 #include "ofxLaserDragHandle.h"
 #include "ofxLaserPolygonBase.h"
+#include "GlobalScale.h"
 #ifdef USE_FONT_MANAGER
 #include "ofxFontManager.h"
 #endif

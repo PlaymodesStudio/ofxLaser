@@ -40,7 +40,7 @@ class DacManagerBase {
     protected :
     map<string, DacBase*>dacsById;
     // TODO thread safe??? 
-    bool dacsChanged = false;
+    std::atomic<bool> dacsChanged = false;
     
     private :
     

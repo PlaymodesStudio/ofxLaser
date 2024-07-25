@@ -44,6 +44,9 @@ void DacManagerEtherDream :: threadedFunction() {
     // windows implementation
     SetThreadPriority( thread.native_handle(), THREAD_PRIORITY_LOWEST);
 #endif
+    // sleep a bit the first time! Make sure not to overwhelm everything
+    
+    sleep(3000);
     
     while(isThreadRunning()) {
         
@@ -94,12 +97,12 @@ void DacManagerEtherDream :: threadedFunction() {
                 DacEtherDreamStatus status;
                 status.deserialize(byteaddress);
                 
-                //            cout << "Hardware version :" << hardwareRevision << endl;
-                //            cout << "Software version :" << softwareRevision << endl;
-                //            cout << "Buffer capacity  :" << bufferCapacity << endl;
-                //            cout << "Max point rate   :" << maxPointRate << endl;
-                //            cout << "Buffer           :" << status.buffer_fullness << endl;
-                //            cout << "Point count      :" << status.point_count << endl;
+//                            cout << "Hardware version :" << hardwareRevision << endl;
+//                            cout << "Software version :" << softwareRevision << endl;
+//                            cout << "Buffer capacity  :" << bufferCapacity << endl;
+//                            cout << "Max point rate   :" << maxPointRate << endl;
+//                            cout << "Buffer           :" << status._buffer_fullness << endl;
+//                            cout << "Point count      :" << status.point_count << endl;
                 //
                 char idchar[100];
                 int part0 = macAddress & 0xffff;
@@ -160,14 +163,16 @@ void DacManagerEtherDream :: threadedFunction() {
 vector<DacData> DacManagerEtherDream :: updateDacList(){
     
     vector<DacData> daclist;
-    
-    for(auto etherdreampair : etherdreamDataByMacAddress) {
-        EtherDreamData& ed = etherdreampair.second;
-       // ofLogNotice(ed.macAddress);
-        
-        string id = ed.macAddress;
-        daclist.emplace_back(getType(), id, ed.ipAddress);
-
+    if(lock()) {
+        for(auto etherdreampair : etherdreamDataByMacAddress) {
+            EtherDreamData& ed = etherdreampair.second;
+            // ofLogNotice(ed.macAddress);
+            
+            string id = ed.macAddress;
+            daclist.emplace_back(getType(), id, ed.ipAddress);
+            
+        }
+        unlock();
     }
     return daclist;
 }

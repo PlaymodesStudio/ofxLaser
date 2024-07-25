@@ -63,6 +63,15 @@ bool Laser::hasDac() {
     return (dac != &emptyDac);
 }
 
+void Laser::setDacDiagnostics(bool state) {
+    DacBaseThreaded* dac =  dynamic_cast<DacBaseThreaded*> (getDac());
+    if(dac!=nullptr) {
+        dac->setDiagnosticsRecording(state); 
+    }
+    
+}
+
+
 bool Laser::removeDac(){
     if (dac != &emptyDac) {
         dac = &emptyDac;

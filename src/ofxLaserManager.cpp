@@ -68,27 +68,8 @@ Manager :: Manager(bool hidecanvas) {
      
     setDefaultPreviewOffsetAndScale();
     
-//    params.add(showGuideImage.set("Show guide image", false));
-//    params.add(guideImageColour.set("Guide image colour", ofColor::white));
-//    params.add(guideImageFilename.set("Guide image filename", ""));
     dacSettingsTimeSlice.set("Magnification", 0.5, 0.1, 20);
-    
-    // loadedJson is filled on loadSettings. So now check the extras.
-    if(!loadedJson.empty()) {
-        if(loadedJson.contains("Laser")) {
-          
-            try {
-//                ofDeserialize(loadedJson["Laser"], showGuideImage);
-//                ofDeserialize(loadedJson["Laser"], guideImageColour);
-//                ofDeserialize(loadedJson["Laser"], guideImageFilename);
-//                if(guideImageFilename.get()!="") setGuideImage("guideImages/" + guideImageFilename.get());
-//
-            } catch(...) {
-                //cout << showGuideImage << " " <<loadJson["Laser"]["Show_guide_image"]<< endl;
-            }
-        }
-    }
-    
+        
     params.add(customParams);
     ofAddListener(ofEvents().mouseEntered, this, &Manager::mouseEntered, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().mouseExited, this, &Manager::mouseExited, OF_EVENT_ORDER_BEFORE_APP);
@@ -134,6 +115,7 @@ void Manager :: createAndAddLaser()  {
     laserZoneViews.back().autoFitToOutput();
     laserZoneViews.back().setGrid(zoneGridSnap, zoneGridSize, zoneGridVisible);
     setSelectedLaserIndex(laserindex);
+    showDacDiagnostics.resize(lasers.size());
     
 }
 
@@ -154,13 +136,7 @@ void Manager :: initAndLoadSettings() {
     ofxLaser::UI::setupGui();
    
     interfaceParams.setName("Interface");
-//    interfaceParams.add(lockInputZones.set("Lock input zones", true));
-//    interfaceParams.add(showInputZones.set("Show input zones", true));
-//    interfaceParams.add(showInputPreview.set("Show preview", true));
-//    interfaceParams.add(showOutputPreviews.set("Show path previews", true));
-    //interfaceParams.add(useBitmapMask.set("Use bitmap mask", false));
-    //interfaceParams.add(showBitmapMask.set("Show bitmap mask", false));
-    //interfaceParams.add(laserMasks.set("Laser mask shapes", false));
+
     params.add(interfaceParams);
     
     customParams.setName("CUSTOM PARAMETERS");
@@ -178,7 +154,6 @@ void Manager :: initAndLoadSettings() {
     
     params.add(globalLatency.set("Latency (ms)", 150,0,400));
 
-   // params.add(showDacAssignmentWindow.set("showDacAssignmentWindow", false));
     params.add(showCustomParametersWindow.set("showCustomParametersWindow", true));
     params.add(showLaserOverviewWindow.set("showLaserManagementWindow", true));
     params.add(showLaserOutputSettingsWindow.set("showLaserOutputSettingsWindow", true));
@@ -188,8 +163,6 @@ void Manager :: initAndLoadSettings() {
     // param changed updates zone settings and global latency on all
     paramChanged(params);
     ofAddListener(params.parameterChangedE(), this, &Manager::paramChanged);
- 
-    //showInputPreview = true;
     
     copyParams.add(copyScannerSettings.set("Copy scanner / speed settings", false));
     copyParams.add(copyAdvancedSettings.set("Copy advanced settings", false));
@@ -284,6 +257,9 @@ bool Manager :: deserialize(ofJson& json) {
     if(selectedLaserIndex>=lasers.size()) {
         selectedLaserIndex = lasers.size()-1;
     }
+    
+    showDacDiagnostics.resize(lasers.size());
+    
     return success;
     
 }
@@ -468,7 +444,7 @@ bool Manager :: deleteLaser(Laser* laser) {
             // laserZoneViews is not a pointer so memory should be freed
             laserZoneViews.erase(laserZoneViews.begin() + laserindex);
         }
-        
+        showDacDiagnostics.resize(lasers.size());
         return true;
     } else {
         return false;
@@ -568,11 +544,10 @@ void Manager ::setGuiMouseDisabled(bool state){
 void Manager::addCustomParameter(ofAbstractParameter& param, bool loadFromSettings){
     customParams.add(param);
     if(loadFromSettings){
-        //loadJson.find("custom");
+        
         if(!loadedJson.empty()) {
             if(loadedJson.contains("Laser")) {
                 if(loadedJson["Laser"].contains("CUSTOM_PARAMETERS")) {
-                    //     auto value = loadJson["Laser"]["Custom"][param.getName()];
                     try {
                         ofDeserialize(loadedJson["Laser"]["CUSTOM_PARAMETERS"], param);
                     } catch(...) {
@@ -582,11 +557,6 @@ void Manager::addCustomParameter(ofAbstractParameter& param, bool loadFromSettin
                 }
             }
         }
-        //ofDeserialize(loadJson["custom"], param);
-        //ofLogNotice(loadJson.dump(3));
-        //ofLogNotice(loadJson["Laser"].dump(3));
-        //ofLogNotice(loadJson["Laser"]["Custom"].dump(3));
-        //ofLogNotice(loadJson["Laser"]["Custom"][param.getName()].dump(3));
         
     }
 }
@@ -870,12 +840,9 @@ void Manager::drawLaserGui() {
                 }
                 UI::addDelayedTooltip("Select test pattern");
                 
-                
                 UI::stopGhosted();
                 
                 ImGui::PopItemWidth();
-                
-                
                 
                 if(UI::Button(ICON_FK_PLUS_SQUARE_O, false, zoneGridSnap.get())) {
                     zoneGridSnap.set(!zoneGridSnap.get());
@@ -969,10 +936,6 @@ void Manager::drawLaserGui() {
                         canvasTarget.addGuideImage(result.filePath);
                         scheduleSaveSettings();
                     }
-                    
-                    
-//                    int numZones = canvasTarget.getNumZoneIds();
-//                    ZoneId zoneId = addCanvasZone(numZones*20,numZones*20,100,100);
                 }
                 
                 UI::addDelayedTooltip("Add new guide image");
@@ -1009,8 +972,6 @@ void Manager::drawLaserGui() {
                 }
                 UI::secondaryColourEnd();
                 UI::addDelayedTooltip("Grid visible");
-                
-                
                 
                 ImGui::PopFont();
                 
@@ -1063,11 +1024,7 @@ void Manager::drawLaserGui() {
                         ImGui::PushFont(UI::mediumFont);
                         ImGui::Text("%s", zoneId.getLabel().c_str());
                         ImGui::PopFont();
-                        
-                        // ImGui::Text("CANVAS ZONE %s", zoneId.getLabel().c_str());
-                        //ImGui::Text("CANVAS ZONE %s", label.c_str());
-                        //ImGui::Text("CANVAS ZONE %s %s ", zoneId.getLabel().c_str(), zoneId.getUid().c_str());
-                        
+                                                
                         ImGui::Text("Assign to laser : ");
                         UI::toolTipWarning("WARNING : may start outputting if laser is armed");
                         for(int j = 0; j<lasers.size(); j++ ) {
@@ -1086,8 +1043,6 @@ void Manager::drawLaserGui() {
                             
                         }
                         
-                        
-//                        string buttonlabel = "DELETE ZONE";
                         
                         if(UI::DangerButton("DELETE CANVAS ZONE")) {
                             if(commandPressed) {
@@ -1159,7 +1114,9 @@ void Manager::drawLaserGui() {
     }
 
     guiDacAssignment();
-        
+    
+    drawGuiAllDacAnalytics();
+    
     visualiser3D.drawUI();
 
     for(LaserZoneViewController& laserzoneview : laserZoneViews ) {
@@ -1225,16 +1182,10 @@ void Manager::drawLaserGui() {
     
     guiZoneSettings();
     
-    
-    
-    
-    
 }
 
-
 void Manager :: guiZoneSettings() {
-    
-     
+
     int sourceindex = -1;
     int targetindex = -1;
     bool autosort = false;
@@ -1402,21 +1353,6 @@ void Manager::guiMenuBar() {
     
     if (ImGui::BeginMainMenuBar())
     {
-//        if (ImGui::BeginMenu("File"))
-//        {
-//            //ShowExampleMenuFile();
-//            ImGui::EndMenu();
-//        }
-//        if (ImGui::BeginMenu("Edit"))
-//        {
-////            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-////            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-////            ImGui::Separator();
-////            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-////            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-////            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-//            ImGui::EndMenu();
-//        }
         
         if (ImGui::BeginMenu("File"))
         {
@@ -1453,19 +1389,12 @@ void Manager::guiMenuBar() {
                 ImGui::EndMenu();
                 
             }
-            
-           
-                //
-               
-            
-            
+                        
             ImGui::EndMenu();
-            
-            
+
         }
         
-        
-        
+
         
         if(ImGui::BeginMenu("Window") ) {
             //if(ImGui::BeginMenu("Set up") ) {
@@ -1477,7 +1406,7 @@ void Manager::guiMenuBar() {
             }
             if (ImGui::MenuItem("Controller Assignment", "",showDacAssignmentWindow )) {
                 showDacAssignmentWindow= !showDacAssignmentWindow;
-                //ImGui::SetWindowFocus("Controller Assignment");
+                
                 ImGui::SetWindowCollapsed("Controller Assignment", false);
                 ImGui::SetWindowFocus("Controller Assignment");
             }
@@ -1493,9 +1422,7 @@ void Manager::guiMenuBar() {
             }
             
             ImGui::EndMenu();
-            //}
-            
-            //ImGui::EndMenu();
+           
         }
         menuBarHeight = ImGui::GetWindowHeight();
         ImGui::EndMainMenuBar();
@@ -1616,12 +1543,16 @@ void Manager :: guiLaserOverview() {
             
             ImGui::SameLine();
             label = "##framerate"+laserNumberString;
-            ImGui::PushItemWidth(120);
+            ImGui::PushItemWidth(100);
             ImGui::PlotHistogram(label.c_str(), laserobject->frameTimeHistory, laserobject->frameTimeHistorySize, laserobject->frameTimeHistoryOffset, "", 0, 0.1f);
             ImGui::PopItemWidth();
             
+           
+            
+            
             // DAC STATUSES
             ImGui::SameLine();
+            
             
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             ImVec2 size = ImVec2(15,15); // ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight());
@@ -1630,13 +1561,9 @@ void Manager :: guiLaserOverview() {
             ImVec2 p = ImGui::GetCursorScreenPos();
             p.x+=0;
             p.y+=2;
-    //        p.x+=radius-2;
-    //        p.y+=radius+4;
+ 
             ImU32 col = UI::getColourForState(laserobject->getDacConnectedState());
-            
-            //draw_list->AddCircleFilled(p,radius, col);
-            //ImGui::InvisibleButton("##invisible", ImVec2(radius*2, radius*2) - ImVec2(2,2));
-            
+              
             draw_list->AddRectFilled(p, ImVec2(p.x + size.x, p.y + size.y), col);
             ImGui::InvisibleButton("##gradient2", size - ImVec2(0,2));
 
@@ -1696,22 +1623,16 @@ void Manager :: guiLaserSettings(ofxLaser::Laser* laser) {
     
     if(UI::startWindow("Laser output", ImVec2(x,200), ImVec2(guiLaserSettingsPanelWidth,0), ImGuiWindowFlags_None, false, (bool*)&showLaserOutputSettingsWindow.get())) {
         
-        //int laserIndexToShow = selectedLaserIndex;
-        //if(laserIndexToShow ==-1) laserIndexToShow = 0;
-        // drawUIPanelScannerSettings(&getLaser(laserIndexToShow), laserpanelwidth, spacing, 0);
-        
+               
         // draw a flashing dot during saving
         if(laser->getSaveStatus() && (ofGetElapsedTimeMillis()%300)<150) {
             ImDrawList*   draw_list = ImGui::GetWindowDrawList();
             ImVec2 p = ImGui::GetWindowPos();
             p.x+=ImGui::GetContentRegionAvail().x;
-            p.y+=30;// + ImGui::GetScrollY();
-            // if(ImGui::GetScrollY()>0) p.x-=14;
-            //ImGui::GetContentRegionAvailWidth()
+            p.y+=30;
+       
             draw_list->AddCircleFilled(p, 4, ImGui::GetColorU32(ImGuiCol_Border));
         }
-        
-        
         
         // ARM BUTTON ---------------------------------------------------------------
         UI::largeItemStart();
@@ -2111,7 +2032,7 @@ void Manager :: guiCustomParameters() {
 void Manager :: guiDacAssignment() {
     
     if(showDacAssignmentWindow) {
-        if(UI::startWindow("Controller Assignment", ImVec2(100, 100), ImVec2(550,0), ImGuiWindowFlags_None, false, &showDacAssignmentWindow)) {
+        if(UI::startWindow("Controller Assignment", ImVec2(100, 100), ImVec2(650,0), ImGuiWindowFlags_None, false, &showDacAssignmentWindow)) {
             
             
             // get the dacs from the dacAssigner
@@ -2171,7 +2092,7 @@ void Manager :: guiDacAssignment() {
             ImGui::Separator();
             
             ImGui::Columns(2);
-            ImGui::SetColumnWidth(0, 330);
+            ImGui::SetColumnWidth(0, 360);
             
             for (int n = 0; n < lasers.size(); n++){
                 Laser* laser = lasers[n];
@@ -2280,7 +2201,13 @@ void Manager :: guiDacAssignment() {
                         string daclabel = laser->dacLabel;
                         dacAssigner.assignToLaser(daclabel, *laser);
                     }
+                    // DAC STATUSES
+                    ImGui::SameLine();
                     
+                    bool showDiagnostics = showDacDiagnostics[n];
+                    if(UI::Button( ofToString(ICON_FK_LINE_CHART)+"##"+ofToString(n), false,showDiagnostics )) {
+                        showDacDiagnostics[n] = !showDacDiagnostics[n];
+                    }
                     
                 }
                 
@@ -2586,52 +2513,89 @@ void Manager :: guiCopyLaserSettings() {
     }
 }
 
-void Manager::guiDacAnalytics() {
+
+void Manager::drawGuiAllDacAnalytics() {
     
-    if(!showDacAnalytics) return;
     
+    for(int i = 0; i<lasers.size(); i++) {
+        Laser& laser = getLaser(i);
+
+        if((showDacDiagnostics[i]) && (laser.hasDac())){
+       
+            laser.setDacDiagnostics(true);
+            guiDacAnalytics(i);
+       
+        } else {
+            laser.setDacDiagnostics(false);
+        }
+        
+    }
+}
+
+void Manager::guiDacAnalytics(int dacIndex) {
+        
     string label;
     
-    ofxLaser::Laser* laser = &getLaser(getSelectedLaserIndex());
+    ofxLaser::Laser* laser = &getLaser(dacIndex);
+        
+    bool windowOpen = showDacDiagnostics[dacIndex];
     
-    if(UI::startWindow("Controller Analytics", ImVec2(guiSpacing, ofGetHeight()-guiSpacing-guiSpacing-600), ImVec2(ofGetWidth()-guiSpacing-guiSpacing, 600), ImGuiWindowFlags_None, false, &showDacAnalytics )) {
+    if(UI::startWindow("Controller Analytics "+ofToString(dacIndex+1), ImVec2(guiSpacing, ofGetHeight()-guiSpacing-guiSpacing-600), ImVec2(ofGetWidth()-guiSpacing-guiSpacing, 600), ImGuiWindowFlags_AlwaysAutoResize, false, &windowOpen )) {
         
-        //UI::extraLargeItemStart();
-        
-    //        label = "Frame time ";
-    //        ImGui::PlotHistogram(label.c_str(), laser->frameTimeHistory, laser->frameTimeHistorySize, laser->frameTimeHistoryOffset, "", 0, 0.1f, ImVec2(0,80));
+
         
         DacBaseThreaded* dac =  dynamic_cast<DacBaseThreaded*> (laser->getDac());
         if(dac!=nullptr) {
+            
+            
+            DacEtherDream* dacEtherDream =  dynamic_cast<DacEtherDream*> (laser->getDac());
+            
+            if(dacEtherDream!=nullptr) {
+              
+                ImGui::Columns(2);
+                EtherDreamData ed = dacEtherDream->getEtherDreamData();
+                ImGui::Text("IP Address : %s", ed.ipAddress.c_str());
+                ImGui::Text("Mac Address : %s", ed.macAddress.c_str());
+                ImGui::Text("Software : %d Hardware %d", ed.softwareRevision, ed.hardwareRevision);
+                ImGui::Text("Buffer capacity : %d", ed.bufferCapacity);
+                ImGui::Text("Current buffer size : %d", dacEtherDream->getLastReportedBufferFullness());
+                
+                ImGui::NextColumn();
+                ImGui::Text("%s", dacEtherDream->getEtherDreamStateString().c_str());
+                
+//                ImGui::Text(
+                ImGui::Columns(1);
+                ImGui::Separator();
+            }
+            
             uint64_t visibledurationmicros = dacSettingsTimeSlice * 1000000; // seconds * million
             uint64_t endTimeMicros = ofGetElapsedTimeMicros();
             uint64_t startTimeMicros = endTimeMicros - visibledurationmicros;
             int numvalues = 1000;
-            dac->stateRecorder.recording = true;
-            dac->stateRecorder.getLatencyValuesForTime(startTimeMicros, endTimeMicros, numvalues);
-            label = "Round trip time";
-            ImGui::PlotHistogram(label.c_str(), dac->stateRecorder.values, numvalues, 0, "", 0.0f, 1000.0f, ImVec2(0,80));
+            
+           
             
             dac->stateRecorder.getBufferSizeValuesForTime(startTimeMicros, endTimeMicros, numvalues);
             label = "Buffer ";
-            ImGui::PlotHistogram(label.c_str(), dac->stateRecorder.values, numvalues, 0, "", 0.0f, dac->getMaxPointBufferSize(), ImVec2(0,80));
+            ImGui::PlotHistogram(label.c_str(), dac->stateRecorder.values, numvalues, 0, "", 0.0f, dac->getMaxPointBufferSize(), ImVec2(600,80));
        
             
-    //            dac->stateRecorder.getDataRateValuesForTime(startTimeMicros, endTimeMicros, numvalues);
-    //            label = "Data rate ";
-    //            ImGui::PlotHistogram(label.c_str(), dac->stateRecorder.values, numvalues, 0, "", 0.0f, 5000.0f, ImVec2(0,80));
+            dac->stateRecorder.getLatencyValues(numvalues,8);
+            label = "Round trip time";
+            ImGui::PlotHistogram(label.c_str(), dac->stateRecorder.values, numvalues, 0, "", 0.0f, 100.0f, ImVec2(600,30));
 
-            dac->frameRecorder.getFrameLatencyValuesForTime(startTimeMicros, endTimeMicros, numvalues);
+
+            dac->frameRecorder.getFrameLatencyValues(numvalues,8);
             label = "Frame latency ";
-            ImGui::PlotHistogram(label.c_str(), dac->frameRecorder.values, numvalues, 0, "", 0.0f, 200000.0f, ImVec2(0,80));
+            ImGui::PlotHistogram(label.c_str(), dac->frameRecorder.values, numvalues, 0, "", 0.0f, 200000.0f, ImVec2(600,30));
             
             dac->frameRecorder.getFrameRepeatValuesForTime(startTimeMicros, endTimeMicros, numvalues);
             label = "Frame repeats ";
-            ImGui::PlotHistogram(label.c_str(), dac->frameRecorder.values, numvalues, 0, "",0.0f, 5.0f, ImVec2(0,80));
+            ImGui::PlotHistogram(label.c_str(), dac->frameRecorder.values, numvalues, 0, "",0.0f, 5.0f, ImVec2(600,30));
             
             dac->frameRecorder.getFrameSkipValuesForTime(startTimeMicros, endTimeMicros, numvalues);
             label = "Frame skips ";
-            ImGui::PlotHistogram(label.c_str(), dac->frameRecorder.values, numvalues, 0, "",0.0f, 1.0f, ImVec2(0,80));
+            ImGui::PlotHistogram(label.c_str(), dac->frameRecorder.values, numvalues, 0, "",0.0f, 1.0f, ImVec2(600,30));
 
           //  UI::addIntSlider(dac->pointBufferMinParam);
             UI::addFloatSlider(dacSettingsTimeSlice);
@@ -2644,6 +2608,8 @@ void Manager::guiDacAnalytics() {
         UI::endWindow();
     }
     
+    showDacDiagnostics[dacIndex] = windowOpen;
+    
 }
 
 ofRectangle Manager :: getPreviewRect() {
@@ -2652,6 +2618,7 @@ ofRectangle Manager :: getPreviewRect() {
 }
 
 glm::vec2 Manager :: getPreviewOffset() {
+    return canvasViewController.getOffset();
     return canvasViewController.getOffset();
 }
 

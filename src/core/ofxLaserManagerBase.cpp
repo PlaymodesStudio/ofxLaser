@@ -156,6 +156,7 @@ bool ManagerBase :: deleteLaser(Laser* laser) {
             if(zoneid.getType() == ZoneId::BEAM) {
                 deleteBeamZone(zone);
             }
+           // Todo - should we delete canvas zones too? 
         }
     }
     
@@ -863,6 +864,7 @@ bool ManagerBase::deserialize(ofJson& json) {
     // if we had more lasers to start with than we needed, then resize
     // the vector (shouldn't be needed but it doesn't hurt)
     lasers.resize(numLasers);
+    
     
     // shouldn't be needed but hey
     disarmAllLasers();

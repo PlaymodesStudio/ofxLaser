@@ -34,7 +34,15 @@ class DacBaseThreaded : public DacBase, public ofThread {
     void cleanUpFramesAndPoints(); 
     
     bool isReadyForFrame(int maxLatencyMS) override;
+    
+    virtual void logNotice(const string& msg) override {
+        if(logging && lock()) {
+            ofLogNotice() << msg;
+            unlock();
+        }
+    }
  
+    void setDiagnosticsRecording(bool state); 
     
     //ofThread
     void threadedFunction() override = 0;
@@ -86,16 +94,16 @@ class DacBaseThreaded : public DacBase, public ofThread {
     deque<DacFrame*> bufferedFrames;
     deque<ofxLaser::Point*> bufferedPoints;
     
-    uint32_t pps, newPPS;
+    std::atomic<uint32_t> pps, newPPS;
     
-    int lastReportedBufferFullness =0 ;
+    std::atomic<int> lastReportedBufferFullness =0 ;
     bool dacIsRunning = false;
     
     // last time any command was acknowleged
-    uint64_t lastAckTime = 0;
+    std::atomic<uint64_t> lastAckTime = 0;
     // last time a data command was sent
-    uint64_t lastDataSentTime = 0;
-    uint64_t lastDataSentBufferSize= 0;
+    std::atomic<uint64_t> lastDataSentTime = 0;
+    std::atomic<uint64_t> lastDataSentBufferSize= 0;
     
 };
 

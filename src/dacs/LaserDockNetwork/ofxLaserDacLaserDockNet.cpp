@@ -145,7 +145,7 @@ void DacLaserDockNet :: threadedFunction(){
         // pps = points per second
         if(connected && (newPPS!=pps)) {
             sendPointRate(newPPS); // assume it was sent i guess? Or periodically send it?
-            pps = newPPS;
+            pps = (uint32_t)newPPS;
         }
         
         // maxPointsToFillBuffer is the minimum number of points we want

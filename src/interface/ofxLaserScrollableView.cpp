@@ -365,7 +365,7 @@ bool ScrollableView :: initialiseFbo() {
     // set up Fbo
     if(!fbo.isAllocated() || (fbo.getWidth()!=(int)outputRect.width) || (fbo.getHeight()!=(int)outputRect.height)) {
         ofLogNotice("ScrollableView :: initialiseFbo - allocating FBO");
-        fbo.allocate(outputRect.width, outputRect.height, GL_RGB, 4);
+        fbo.allocate(outputRect.width, outputRect.height, GL_RGB, 1);
         return true;
     } else {
         fbo.clear();

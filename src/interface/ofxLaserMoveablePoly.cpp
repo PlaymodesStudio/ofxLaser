@@ -67,7 +67,7 @@ void MoveablePoly :: setScale(float _scale) {
     if(scale!=_scale) {
         scale = _scale;
         for(DragHandle& handle : handles) {
-            handle.setSize(handleSize/scale);
+            handle.setSize(handleSize/scale * GlobalScale::getScale());
         }
     }
 }
@@ -477,6 +477,6 @@ void MoveablePoly :: setNumHandles(int newnum) {
     int originalsize = handles.size();
     handles.resize(newnum);
     for(int i = originalsize; i<newnum; i++) {
-        handles[i].setSize(handleSize/scale);
+        handles[i].setSize(handleSize/scale * GlobalScale::getScale());
     }
 }

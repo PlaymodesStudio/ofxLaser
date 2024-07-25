@@ -18,6 +18,7 @@
 #include "ofxLaserConstants.h"
 #include "ofxLaserPointsForShape.h"
 #include "ofxLaserDacBase.h"
+#include "ofxLaserDacBaseThreaded.h"
 #include "ofxLaserDacEmpty.h"
 #include "ofxLaserOutputZone.h"
 #include "ofxLaserManualShape.h"
@@ -49,6 +50,7 @@ class Laser {
     bool removeDac();
     
     bool hasDac(); 
+    void setDacDiagnostics(bool state);
     
     void paramsChanged(ofAbstractParameter& e);
     bool loadSettings();

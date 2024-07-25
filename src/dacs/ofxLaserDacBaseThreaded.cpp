@@ -14,8 +14,8 @@ using namespace ofxLaser;
 bool DacBaseThreaded :: sendFrame(const vector<Point>& points){
 
     if(!isThreadRunning()) return false; 
-//    stateRecorder.update();
-//    frameRecorder.update();
+    stateRecorder.update();
+    frameRecorder.update();
 
     if((!frameMode) && lock()) {
         frameMode = true;
@@ -38,7 +38,7 @@ bool DacBaseThreaded :: sendFrame(const vector<Point>& points){
 
 bool DacBaseThreaded:: sendPoints(const vector<Point>& points){
     
-    //stateRecorder.update();
+    stateRecorder.update();
  
     if(bufferedPoints.size()>pps*0.5) {
         return false;
@@ -138,7 +138,7 @@ void DacBaseThreaded ::  updateFrameQueue(int minPointsToQueue){
         // if we didn't get to the frame in time and it's more than 10ms late then skip it
         if(frame->frameTime + ((maxLatencyMS)*1000) < lastPointTimeMicros) {
             // skip frame!
-            //frameRecorder.recordFrameInfoThreadSafe(frame->frameTime, 0, frame->framePoints.size(), 0, true);
+            frameRecorder.recordFrameInfoThreadSafe(frame->frameTime, 0, frame->framePoints.size(), 0, true);
             delete frame;
             skipcount++;
         } else {
@@ -164,7 +164,7 @@ void DacBaseThreaded ::  updateFrameQueue(int minPointsToQueue){
     
     for(int i = 0; i<queuedFrames.size(); i++ ) {
         DacFrame& frame = *queuedFrames[i];
-        //frameRecorder.recordFrameInfoThreadSafe(frame.frameTime, ofGetElapsedTimeMicros() + (( calculateBufferSizeByTimeSent() + bufferedPoints.size()) * 1000000 / pps), frame.framePoints.size(), frame.repeatCount, frame.repeatCount == 0);
+        frameRecorder.recordFrameInfoThreadSafe(frame.frameTime, ofGetElapsedTimeMicros() + (( calculateBufferFullnessByTimeSent() + bufferedPoints.size()) * 1000000 / pps), frame.framePoints.size(), frame.repeatCount, frame.repeatCount == 0);
         
       
         while(frame.repeatCount>0) {
@@ -194,11 +194,16 @@ inline bool DacBaseThreaded :: addPointToBuffer(const ofxLaser::Point &point ){
 }
 
 
+// must always be run in lock 
 int DacBaseThreaded :: getNumPointsInFrames(deque<DacFrame*>& frames) {
+    if(frames.size()==0) return 0;
     int totalpoints = 0;
+  
     for(DacFrame* frame : frames) {
         totalpoints+=(frame->getNumPoints());
     }
+    unlock();
+
     return totalpoints;
 }
 
@@ -257,5 +262,18 @@ void DacBaseThreaded::cleanUpFramesAndPoints() {
         PointFactory :: releasePoint(bufferedPoints[i]); // Calls ~object
     }
     bufferedPoints.clear();
+    
+}
+void DacBaseThreaded::setDiagnosticsRecording(bool state) {
+    if(isThreadRunning()) {
+        if(lock()) {
+            stateRecorder.recording = state;
+            frameRecorder.recording = state;
+            unlock();
+        }
+    } else{
+        stateRecorder.recording = state;
+        frameRecorder.recording = state;
+    } 
     
 }

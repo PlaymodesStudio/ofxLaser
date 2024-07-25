@@ -98,7 +98,8 @@ class Manager : public ManagerBase {
     void guiZoneSettings();
     
     void guiCopyLaserSettings();
-    void guiDacAnalytics();
+    void drawGuiAllDacAnalytics(); 
+    void guiDacAnalytics(int index);
     void guiCustomParameters();
     void guiShowLaserZoneContextMenu(); 
     
@@ -167,7 +168,7 @@ class Manager : public ManagerBase {
     
     ofParameter<int> globalLatency; 
 
-    bool showDacAnalytics;
+    vector<bool> showDacDiagnostics;
     ofParameter<float> dacSettingsTimeSlice;
 
     ofxLaserViewMode viewMode;

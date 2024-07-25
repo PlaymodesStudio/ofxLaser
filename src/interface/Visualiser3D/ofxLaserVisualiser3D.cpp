@@ -186,7 +186,7 @@ void Visualiser3D :: draw(const ofRectangle& rect, const vector<Laser*>& lasers,
     if((!visFbo.isAllocated()) || (visFbo.getWidth()!=round(rect.getWidth())) || (visFbo.getHeight()!=round(rect.getHeight()))) {
         //ofLogNotice("Visualiser3D :: draw  - fbo.allocated");
         visFbo.clear();
-        visFbo.allocate(round(rect.getWidth()), round(rect.getHeight()), GL_RGBA, 4);
+        visFbo.allocate(round(rect.getWidth()), round(rect.getHeight()), GL_RGB, 1);
     }
     
     visFbo.begin();
@@ -243,11 +243,14 @@ void Visualiser3D :: draw(const ofRectangle& rect, const vector<Laser*>& lasers,
         
         ofPushMatrix();
         ofTranslate(lasersettings.canvasPos);
-        ofScale(lasersettings.canvasScale->x, lasersettings.canvasScale->y);
+        //
+        //ofLogNotice() << lasersettings.canvasScale; 
         // todo - fix order
         ofRotateXDeg(lasersettings.canvasRotation->x);
         ofRotateYDeg(lasersettings.canvasRotation->y);
         ofRotateZDeg(lasersettings.canvasRotation->z);
+        
+        ofScale(lasersettings.canvasScale->x, lasersettings.canvasScale->y);
 
         canvasFbo.setAnchorPercent(0.5,0.5);
         
@@ -629,19 +632,19 @@ void Visualiser3D ::drawUI(){
             float xscale = lasersettings.canvasScale->x;
             float yscale = lasersettings.canvasScale->y;
             
-            if(UI::addResettableFloatSlider("Canvas scale x", xscale, currentLaserPreset.canvasScale->x, 0.01,10 ) ) {
-                if(ofGetKeyPressed(OF_KEY_SHIFT)) {
+            if(UI::addResettableFloatSlider("Canvas scale x", xscale, currentLaserPreset.canvasScale->x, 0.01,2 ) ) {
+                //if(ofGetKeyPressed(OF_KEY_SHIFT)) {
                     lasersettings.canvasScale = {xscale,yscale} ;
-                } else {
-                    lasersettings.canvasScale = {xscale,xscale} ;
-                }
+                //} else {
+                //    lasersettings.canvasScale = {xscale,xscale} ;
+                //}
             }
-            if(UI::addResettableFloatSlider("Canvas scale y", yscale, currentLaserPreset.canvasScale->y, 0.01,10 ) ) {
-                if(ofGetKeyPressed(OF_KEY_SHIFT)) {
-                    lasersettings.canvasScale = {yscale,yscale} ;
-                } else {
-                    lasersettings.canvasScale = {xscale,xscale} ;
-                }
+            if(UI::addResettableFloatSlider("Canvas scale y", yscale, currentLaserPreset.canvasScale->y, 0.01,2 ) ) {
+               // if(ofGetKeyPressed(OF_KEY_SHIFT)) {
+                    lasersettings.canvasScale = {xscale,yscale} ;
+                //} else {
+                //    lasersettings.canvasScale = {yscale,yscale} ;
+                //}
             }
             //UI::addFloatSlider("canvas scale y", &lasersettings.canvasScale->y, 0.01,10 );
             //        (lasersettings.canvasScale, currentLaserPreset.canvasScale,0.01,"", "%.0f", "##canvasscale");

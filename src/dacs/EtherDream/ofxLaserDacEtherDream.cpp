@@ -45,7 +45,7 @@ void DacEtherDream :: setup(string _id, string _ip, EtherDreamData& ed) {
 	connected = false;
 	ipAddress = _ip;
     id = _id;
-    etherDreamData = ed;
+    etherDreamData = ed; // should copy! 
     lastAckTime = ofGetElapsedTimeMicros();
     
     // EtherDream Hardware revision :
@@ -205,7 +205,7 @@ void DacEtherDream :: threadedFunction(){
         if(connected && (response.status.playback_state==ETHERDREAM_PLAYBACK_PLAYING) && (newPPS!=pps)) {
             
             if(sendPointRate(newPPS)){
-                pps = newPPS;
+                pps = (uint32_t)newPPS;
                 waitForAck('q');
                 // after you send a rate change message you need to
                 // include a flag on one of the points that tells
@@ -470,6 +470,41 @@ inline bool DacEtherDream :: sendPointsToDac(){
 	
 }
 
+
+EtherDreamData DacEtherDream::getEtherDreamData() {
+    EtherDreamData ed;
+    
+    if(isThreadRunning()) {
+        if(lock()) {
+            ed = etherDreamData;
+            unlock();
+        }
+        
+    } else {
+        ed = etherDreamData;
+    }
+    return ed;
+}
+
+int DacEtherDream::getLastReportedBufferFullness() {
+    
+    int result = 0;
+    
+    if(isThreadRunning()) {
+        if(lock()) {
+            result = lastReportedBufferFullness;
+            unlock();
+        }
+        
+    } else {
+        result = lastReportedBufferFullness;
+    }
+    return result;
+    
+}
+
+
+
 inline bool DacEtherDream::waitForAck(char command) {
 	
 	// TODO :
@@ -720,6 +755,16 @@ int DacEtherDream :: getStatus(){
 	else return OFXLASER_DACSTATUS_ERROR;
 }
 
+
+string DacEtherDream :: getEtherDreamStateString() {
+    string statusstring;
+    if(lock()) {
+        statusstring = response.status.toString();
+        unlock();
+    }
+    return statusstring;
+}
+
 inline bool DacEtherDream :: sendBegin(){
 	logNotice("sendBegin()");
     dacCommand.setBeginCommand(pps);
@@ -861,7 +906,7 @@ bool DacEtherDream::setPointsPerSecond(uint32_t newpps){
         while(!lock());
         newPPS = newpps;
         if (!beginSent) {
-            pps = newPPS; // pps rate will get sent with begin anyway
+            pps = (uint32_t)newPPS; // pps rate will get sent with begin anyway
             unlock();
             return true;
         } else {

@@ -152,7 +152,7 @@ void DacLaserDock :: threadedFunction(){
                     }
                     unlock();
                     if(dacDevice->set_dac_rate(newPPS)) {
-                        pps = newPPS;
+                        pps = (uint32_t)newPPS;
                     } else {
                         // ?? do something?
                     }

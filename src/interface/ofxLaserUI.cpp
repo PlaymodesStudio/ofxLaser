@@ -1015,7 +1015,7 @@ bool UI::startWindow(string name, ImVec2 pos, ImVec2 size, ImGuiWindowFlags flag
     //      if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
    
     // set the main window size and position
-    //ImGui::SetNextWindowSize(size, ImGuiCond_Once);
+    ImGui::SetNextWindowSize(size, ImGuiCond_Once);
 
     if(resetPosition) ImGui::SetNextWindowSize(size, ImGuiCond_Always );
     ImGui::SetNextWindowPos(pos, resetPosition ? ImGuiCond_Always : ImGuiCond_FirstUseEver);

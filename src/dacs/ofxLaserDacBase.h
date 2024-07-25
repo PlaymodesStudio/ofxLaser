@@ -57,14 +57,14 @@ namespace ofxLaser {
             return true;
         }
         
-        void logNotice(const string& msg) {
+        virtual void logNotice(const string& msg) {
             if(logging) {
                 ofLogNotice() << msg;
             }
         }
         
         
-        int maxLatencyMS;
+        std::atomic<int> maxLatencyMS;
         // additional buffer time to allow for calculations
         // only used to know if the frame is ready
         int calculationTimeMS = 10;
@@ -75,7 +75,7 @@ namespace ofxLaser {
         bool colourShiftImplemented = false;
 		
         bool verbose = false;
-        bool logging = false;
+        bool logging = true;
         
 	protected :
 	

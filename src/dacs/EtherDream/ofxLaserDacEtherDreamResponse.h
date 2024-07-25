@@ -53,7 +53,7 @@ class DacEtherDreamStatus {
     
     string toString() {
         string returnstring = "";
-        returnstring+= "\nprotocol           : " + to_string(protocol) + "\n";
+        returnstring+= "protocol           : " + to_string(protocol) + "\n";
         returnstring+= "light_engine_state : " + light_engine_states[light_engine_state]+" "+to_string(light_engine_state) + "\n";
         returnstring+= "playback_state     : " + playback_states[playback_state]+" "+to_string(playback_state) + "\n";
         returnstring+= "source             : " + to_string(source) + "\n";
