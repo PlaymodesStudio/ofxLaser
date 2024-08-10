@@ -32,7 +32,7 @@ ZoneTransformQuadComplexData::ZoneTransformQuadComplexData() {
 }
 
 void ZoneTransformQuadComplexData :: paramChanged(ofAbstractParameter& e) {
-    isDirty= true;
+    setDirty(true);
     
 }
 ZoneTransformQuadComplexData::~ZoneTransformQuadComplexData() {
@@ -50,12 +50,12 @@ void ZoneTransformQuadComplexData::init() {
 
 bool ZoneTransformQuadComplexData::update(){
     
-    if(isDirty) {
+    if(getIsDirty()) {
         //ofLogNotice("ZoneTransform::update() - isDirty");
         //updateQuads();
         //updateHandleColours();
         //updateConvex();
-        isDirty = false;
+        setDirty(false);
         return true;
     } else {
         return false;
@@ -168,21 +168,31 @@ void ZoneTransformQuadComplexData::resetDst(glm::vec2 topleft, glm::vec2 toprigh
         }
     }
     dstPoints = newpoints;
-    isDirty = true;
+    setDirty(true);
  
 }
 
-void ZoneTransformQuadComplexData :: updatePoints(vector<glm::vec2*> points) {
+void ZoneTransformQuadComplexData :: setFromPoints(vector<glm::vec2*> points) {
 
+    bool changed = false;
     for(int i = 0; i<points.size(); i++) {
-        dstPoints[i] = *points[i];
+        if(dstPoints[i] != *points[i]) {
+            dstPoints[i] = *points[i];
+            changed = true;
+        }
     }
-    //
-//    for(glm::vec2& p : dstPoints) {
-//        p+=dragoffset;
-//        
-//    }
-    isDirty = true;
+
+    if(changed) {
+        setDirty(true);
+        glm::vec2 delta = getVectorToBringWithinBoundingBox();
+        ofLogNotice("delta : ") << delta;
+        if(glm::length(delta)>0) {
+            for(glm::vec2& p : dstPoints) {
+                p+= delta;
+            }
+        }
+        setDirty(true);
+    }
     
 }
 
@@ -192,7 +202,7 @@ bool ZoneTransformQuadComplexData :: moveHandle(int handleindex, glm::vec2 newpo
     
     if(dstPoints[handleindex]!=newpos) {
         dstPoints[handleindex]=newpos;
-        isDirty = true;
+        setDirty(true);
         return true;
         
     } else  {
@@ -402,9 +412,38 @@ bool ZoneTransformQuadComplexData::deserialize(ofJson& jsonGroup) {
            
         }
     }
-    isDirty = true;
+    setDirty(true);
     return true;
 }
+
+glm::vec2 ZoneTransformQuadComplexData:: getVectorToBringWithinBoundingBox(){
+    
+    for(glm::vec2& p : dstPoints) {
+        if(boundaryRect.inside(p)) {
+            return glm::vec2(0,0);
+        }
+    }
+    
+    float dist = INFINITY;
+    glm::vec2 delta(0,0);
+    
+    for(glm::vec2& p : dstPoints) {
+        glm::vec2 closestpoint = p;
+        closestpoint.x = ofClamp(closestpoint.x, boundaryRect.getLeft(), boundaryRect.getRight());
+        closestpoint.y = ofClamp(closestpoint.y, boundaryRect.getTop(), boundaryRect.getBottom());
+        glm::vec2 d = closestpoint - p;
+        if(glm::length(d) < dist) {
+            dist = glm::length(d);
+            delta = d;
+        }
+    }
+    return delta;
+
+    
+    
+}
+
+
 //
 //
 //float ZoneTransformQuadComplexData::getRight() {

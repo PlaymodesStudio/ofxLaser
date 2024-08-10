@@ -155,8 +155,10 @@ bool ViewWithMoveables :: mousePressed(ofMouseEventArgs &e){
 
     ofMouseEventArgs mouseEvent = screenPosToLocalPos(e);
     if(!getOutputRect().inside(e)) {
+        setSelected(false);
         return propagate;
     }
+    selectIfHit(e);
     
     if(uiElementsEnabled) {
         
@@ -199,8 +201,6 @@ bool ViewWithMoveables :: mousePressed(ofMouseEventArgs &e){
     if(propagate) {
         propagate & ScrollableView::mousePressed(e);
     }
-        
-    
     
     return propagate;
 }
@@ -228,6 +228,42 @@ void ViewWithMoveables :: mouseReleased(ofMouseEventArgs &e) {
         uiElement->mouseReleased(mouseEvent);
     }
 }
+ bool ViewWithMoveables :: keyPressed(ofKeyEventArgs & e){
+     
+     if(!selected) return false;
+     if(!isVisible) return false;
+     if(!enabled) return false;
+     
+     glm::vec2 nudgevector;
+     float nudgedist = 1;
+     if(e.hasModifier(OF_KEY_SHIFT)) {
+         nudgedist*=10;
+     }
+     bool nudge = false;
+     if(e.key==OF_KEY_UP) {
+         nudgevector.y = -nudgedist;
+         nudge = true;
+     } else if(e.key==OF_KEY_DOWN) {
+         nudgevector.y = nudgedist;
+         nudge = true;
+     }
+     if(ofGetKeyPressed(OF_KEY_LEFT)) {
+         nudgevector.x = -nudgedist;
+         nudge = true;
+     } else if(ofGetKeyPressed(OF_KEY_RIGHT)) {
+         nudgevector.x = +nudgedist;
+         nudge = true;
+     }
+     if(nudge) {
+         for(MoveablePoly* uiElement: uiElementsSorted) {
+             if(uiElement->getSelected()) {
+                 uiElement->nudge(nudgevector);
+             }
+         }
+     }
+    return nudge;
+}
+
 
 bool ViewWithMoveables :: setUiElementsEnabled(bool enabled) {
     if(uiElementsEnabled!=enabled) {

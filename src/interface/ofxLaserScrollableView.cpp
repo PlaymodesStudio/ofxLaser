@@ -24,7 +24,7 @@ void ScrollableView :: drawFrame() {
     // draw frame
     ofPushStyle();
     ofNoFill();
-    ofSetColor(30);
+    ofSetColor(selected? 80 : 30);
     ofDrawRectangle(outputRect);
     ofPopStyle();
     
@@ -107,7 +107,7 @@ void ScrollableView :: drawEdges() {
 }
 
 bool ScrollableView::update(){
-    
+    setClickArea(boundingRect);
     if(boundingRect!=sourceRect) {
         boundingRect = sourceRect;
         checkEdges();
@@ -209,8 +209,11 @@ ofMouseEventArgs ScrollableView::screenPosToLocalPos(ofMouseEventArgs e) {
 
 bool ScrollableView::mousePressed(ofMouseEventArgs &e){
     
-    if(!getIsVisible()) return true;
-    
+    if(!getIsVisible()) {
+        setSelected(false);
+        return true;
+    }
+    selectIfHit(e);
     float clicktime = ofGetElapsedTimef();
     float clickinterval =clicktime-lastClickTime;
     lastClickTime =clicktime;

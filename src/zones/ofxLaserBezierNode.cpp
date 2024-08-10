@@ -50,6 +50,14 @@ bool BezierNode :: setControlPoints( glm::vec2 cp1, glm::vec2 cp2) {
 }
 
 
+void BezierNode :: translate(glm::vec2 delta) {
+    
+    for(glm::vec2& handle : handles) {
+        handle+=delta;
+    }
+    
+    
+}
 //
 //void BezierNode :: draw(glm::vec2 mousePos, float scale) {
 //    

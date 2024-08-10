@@ -31,7 +31,7 @@ ZoneTransformQuadData::ZoneTransformQuadData() {
 }
 
 void ZoneTransformQuadData :: paramChanged(ofAbstractParameter& e) {
-    isDirty= true;
+    setDirty(true);
     
 }
 ZoneTransformQuadData::~ZoneTransformQuadData() {
@@ -53,11 +53,11 @@ void ZoneTransformQuadData::init() {
 
 
 bool ZoneTransformQuadData::update(){
-    if(isDirty) {
+    if(getIsDirty() ) {
         //ofLogNotice("ZoneTransform::update() - isDirty");
         updateQuads();
         updateConvex();
-        isDirty = false;
+        setDirty(false);
         return true;
     } else {
         return false;
@@ -86,7 +86,7 @@ void ZoneTransformQuadData :: resetToSquare() {
     corners[1].x = corners[3].x = getRight(); // ofLerp(corners[1].x,corners[3].x,0.5);
     corners[3].y = corners[2].y = getBottom(); // ofLerp(corners[3].y,corners[2].y,0.5);
     setDstCorners(corners[0], corners[1], corners[2], corners[3]);
-    isDirty = true;
+    setDirty(true);
 }
 
 bool ZoneTransformQuadData :: isAxisAligned() {
@@ -176,8 +176,18 @@ void ZoneTransformQuadData :: setDstCorners(glm::vec2 topleft, glm::vec2 toprigh
             *points[i]=*newpoints[i];
         }
         
+        setDirty(true);
+        
+        glm::vec2 delta = getVectorToBringWithinBoundingBox();
+       // ofLogNotice() << delta;
+        if(glm::length(delta) > 0) {
+            for(size_t i = 0; i<4; i++) {
+                *points[i]+=delta;
+            }
+            setDirty(true);
+        }
+        
     }
-    isDirty|=pointschanged;
  
 }
 
@@ -190,11 +200,18 @@ bool ZoneTransformQuadData :: moveHandle(int handleindex, glm::vec2 newpos, bool
     int i = handleindex;
     vector<glm::vec2*> points = getCornerPointsClockwise();
     bool pointchanged = false;
-    if(*points[i]!=newpos) {
+    if((*points[i]!=newpos)) {
+        
         // clamp between points to avoid concave shapes
         if(!lockSquare) {
             // clamp to vector between neighbours
             GeomUtils::clampToVector(newpos, *points[(i+3)%4], *points[(i+1)%4], true, false);
+            
+            if(!boundaryRect.inside(newpos)) {
+                newpos.x = ofClamp(newpos.x, boundaryRect.getLeft(), boundaryRect.getRight());
+                newpos.y = ofClamp(newpos.y, boundaryRect.getLeft(), boundaryRect.getRight());
+            }
+            
             
             glm::vec2& pointbefore = *points[(i+3)%4];
             glm::vec2& pointopposite = *points[(i+2)%4];
@@ -213,13 +230,16 @@ bool ZoneTransformQuadData :: moveHandle(int handleindex, glm::vec2 newpos, bool
             afteredge = glm::rotate(afteredge, float(-minangle*PI/180.0f)); // rotate it one degree
             GeomUtils::clampToVector(newpos,  pointafter, pointafter+afteredge, true, false);
             
-            
-            
-            
             *points[i] = newpos;
             
         } else {
             // constrained version
+            
+            if(!boundaryRect.inside(newpos)) {
+                newpos.x = ofClamp(newpos.x, boundaryRect.getLeft(), boundaryRect.getRight());
+                newpos.y = ofClamp(newpos.y, boundaryRect.getLeft(), boundaryRect.getRight());
+            }
+            
             float minsize = 2;
             
             glm::vec2& pointbefore = *points[(i+3)%4];
@@ -255,7 +275,7 @@ bool ZoneTransformQuadData :: moveHandle(int handleindex, glm::vec2 newpos, bool
         *points[i]=newpos; 
         
     }
-    isDirty|=pointchanged;
+    setDirty(getIsDirty() || pointchanged);
     
     return pointchanged;
     

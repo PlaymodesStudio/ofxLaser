@@ -34,6 +34,8 @@ class ViewWithMoveables : public ScrollableView  {
     virtual void mouseDragged(ofMouseEventArgs &e) override;
     virtual void mouseReleased(ofMouseEventArgs &e) override;
     
+    virtual bool keyPressed(ofKeyEventArgs &e) override; 
+    
     virtual void setLockedAll(bool lockstate);
     
     virtual MoveablePoly* getUiElementByUid(string _uid); 

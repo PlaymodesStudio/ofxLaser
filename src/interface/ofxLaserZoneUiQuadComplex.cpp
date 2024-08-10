@@ -27,14 +27,23 @@ bool ZoneUiQuadComplex ::  updateDataFromUi(OutputZone* outputZone) {
         ofLogError("ZoneUiQuadComplex passed wrong kind of zone transform base!");
         return changed;
     } else {
-        if(isDragging) {
-            //zoneQuad->drag(dragOffset);
-            zoneQuad->updatePoints(getPoints());
-            //zoneQuad->setDstCorners(handles[0], handles[1], handles[3], handles[2]);
-        } else if(mainDragHandleIndex>=0) {
+//        if(isDragging) {
+//            //zoneQuad->drag(dragOffset);
+//            zoneQuad->updatePoints(getPoints());
+//            //zoneQuad->setDstCorners(handles[0], handles[1], handles[3], handles[2]);
+//        } else if(mainDragHandleIndex>=0) {
+//            zoneQuad->moveHandle(mainDragHandleIndex, *getMainDragHandle(), constrainedToSquare && !ofGetKeyPressed(OF_KEY_ALT));
+//        }
+//        
+        if(mainDragHandleIndex>=0) {
             zoneQuad->moveHandle(mainDragHandleIndex, *getMainDragHandle(), constrainedToSquare && !ofGetKeyPressed(OF_KEY_ALT));
+            changed = true;
+        } else {
+            zoneQuad->setFromPoints(getPoints());
+            changed = true;
         }
-        return true;
+        
+        return changed;
     }
 }
 

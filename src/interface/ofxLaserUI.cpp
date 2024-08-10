@@ -41,7 +41,7 @@ void UI::setupGui() {
     }
     
     imGuiOfx.setup(nullptr, true, ImGuiConfigFlags_NoMouseCursorChange , true, true );
-//
+
     ImGuiIO& io = ImGui::GetIO();
     
     imguiSavePath = ofToDataPath("resources/imgui.ini");
@@ -51,16 +51,7 @@ void UI::setupGui() {
     // bit nasty but hey
     memcpy(buffer, imguiSavePath.c_str(), size + 1);
     io.IniFilename = buffer;
-    //ImGui::LoadIniSettingsFromDisk(io.IniFilename);
-    
 
-
-
-      
-  
-    
-
-    //symbolFont->
     ImFontConfig mergeConfig;
     mergeConfig.MergeMode = true;
     mergeConfig.GlyphMinAdvanceX = 13;
@@ -93,7 +84,7 @@ void UI::setupGui() {
     ImGui::GetStyle().WindowBorderSize = 1.0f;
     ImGui::GetStyle().IndentSpacing = 0.0f;
     ImGui::GetStyle().Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.0f, 0.0f,0.0f,0.4f);
-   // ImGui::GetStyle().Colors[ImGuiCol_ModalWindowDarkening]
+
     ImGui::GetStyle().ItemSpacing = ImVec2(8.0f,5.0f);
     ImGui::GetStyle().ItemInnerSpacing = ImVec2(6.0f,6.0f);
     ImGui::GetStyle().WindowMinSize = ImVec2(10.0f,10.0f);
@@ -223,7 +214,24 @@ bool UI::addIntSlider(string label, int& target, int min, int max){
     return ImGui::SliderInt(label.c_str(), (int*)&target, min, max, "%d");;
 }
 bool UI::addFloatSlider(string label, float& target, float min, float max, const char* format, ImGuiSliderFlags flags) {
-    return ImGui::SliderFloat(label.c_str(), &target, min, max, format, flags);
+    bool changed =  ImGui::SliderFloat(label.c_str(), &target, min, max, format, flags);
+    ImGui::SetItemUsingMouseWheel();
+    if( ImGui::IsItemHovered() ) {
+        float wheel = ImGui::GetIO().MouseWheel;
+        if( wheel )
+        {
+            if( ImGui::IsItemActive() )
+            {
+                ImGui::ClearActiveID();
+            }
+            else
+            {
+                target += (wheel/4) * 0.1;
+                changed = true;
+            }
+        }
+    }
+    return changed;
 }
 bool UI::addFloat2Slider(string label, glm::vec2& target, glm::vec2 min, glm::vec2 max, const char* format, ImGuiSliderFlags flags){
     return ImGui::SliderFloat2(label.c_str(), glm::value_ptr(target), min.x, max.x, format, flags);

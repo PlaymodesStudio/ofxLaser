@@ -51,6 +51,8 @@ class MoveablePoly {
         return hitTest(p.x, p.y);
     }
     virtual void startDraggingHandleByIndex(int index); 
+    
+    virtual void nudge(glm::vec2 delta); 
 
     void resetColours(); 
     void setHue(int hue) ;

@@ -368,6 +368,13 @@ void MoveablePoly :: mouseReleased(ofMouseEventArgs &e){
     isDirty|=wasDragging;
 }
 
+void MoveablePoly :: nudge(glm::vec2 delta) {
+    for(size_t i= 0; i<handles.size(); i++) {
+        handles[i]+=delta;
+    }
+    setDirty(); 
+    
+}
 
 bool MoveablePoly :: hitTest(glm::vec2& p)  {
     return hitTest(p.x, p.y);

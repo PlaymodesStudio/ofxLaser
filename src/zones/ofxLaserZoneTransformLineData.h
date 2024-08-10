@@ -48,6 +48,9 @@ class ZoneTransformLineData : public ZoneTransformBase {
     virtual ofPoint getWarpedPoint(const ofPoint& p) override;
     virtual ofPoint getUnWarpedPoint(const ofPoint& p) override;
     
+    
+    virtual ofRectangle getBoundingBox() override ;
+    
     glm::vec3 getVectorNormal(glm::vec3 v1, glm::vec3 v2);
     vector<BezierNode>& getNodes();
     

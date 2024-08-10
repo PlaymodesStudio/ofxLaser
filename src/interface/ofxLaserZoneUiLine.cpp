@@ -28,11 +28,12 @@ bool ZoneUiLine ::  updateDataFromUi(OutputZone* outputZone) {
         return changed;
     } else {
         
-        if(isDragging) {
-            zoneLine->setFromPoints(getPoints());
-            changed = true;
-        } else if(mainDragHandleIndex>=0) {
+       // if(isDragging)
+        if(mainDragHandleIndex>=0) {
             zoneLine->moveHandle(mainDragHandleIndex, *getMainDragHandle());
+            changed = true;
+        } else {
+            zoneLine->setFromPoints(getPoints());
             changed = true;
         }
         

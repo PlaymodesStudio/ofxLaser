@@ -80,6 +80,8 @@ Manager :: Manager(bool hidecanvas) {
     ofAddListener(ofEvents().mouseDragged, this, &Manager::mouseDragged, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().mouseScrolled, this, &Manager::mouseScrolled, OF_EVENT_ORDER_BEFORE_APP);
     showCopySettingsWindow = showDacAssignmentWindow = showCanvasSettingsWindow = showBeamZoneSortWindow = false;
+    
+    ofAddListener(ofEvents().keyPressed, this, &Manager::keyPressed, OF_EVENT_ORDER_BEFORE_APP);
 
 
 }
@@ -96,6 +98,8 @@ Manager::~Manager() {
     ofRemoveListener(ofEvents().mouseReleased, this, &Manager::mouseReleased, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(ofEvents().mouseDragged, this, &Manager::mouseDragged, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(params.parameterChangedE(), this, &Manager::paramChanged);
+    
+    ofRemoveListener(ofEvents().keyPressed, this, &Manager::keyPressed, OF_EVENT_ORDER_BEFORE_APP);
 
 }
 
@@ -418,8 +422,18 @@ void Manager :: mouseExited(ofMouseEventArgs &e) {
 
 
 bool Manager :: keyPressed(ofKeyEventArgs &e) {
+    bool capturekey = false;
+    for(LaserZoneViewController& laserZoneView : laserZoneViews) {
+        if(laserZoneView.getSelected()) {
+            bool changed = laserZoneView.keyPressed(e);
+            capturekey|=changed;
+            
+        }
+    }
+    
+    
     // false means we keep the event bubbling
-    return false;
+    return capturekey;
 }
        
 bool Manager :: keyReleased(ofKeyEventArgs &e){
@@ -2577,7 +2591,7 @@ void Manager::guiDacAnalytics(int dacIndex) {
             
             dac->stateRecorder.getBufferSizeValuesForTime(startTimeMicros, endTimeMicros, numvalues);
             label = "Buffer ";
-            ImGui::PlotHistogram(label.c_str(), dac->stateRecorder.values, numvalues, 0, "", 0.0f, dac->getMaxPointBufferSize(), ImVec2(600,80));
+            ImGui::PlotHistogram(label.c_str(), dac->stateRecorder.values, numvalues, 0, "", 0.0f, dac->getDacTotalPointBufferCapacity(), ImVec2(600,80));
        
             
             dac->stateRecorder.getLatencyValues(numvalues,8);
@@ -2589,11 +2603,11 @@ void Manager::guiDacAnalytics(int dacIndex) {
             label = "Frame latency ";
             ImGui::PlotHistogram(label.c_str(), dac->frameRecorder.values, numvalues, 0, "", 0.0f, 200000.0f, ImVec2(600,30));
             
-            dac->frameRecorder.getFrameRepeatValuesForTime(startTimeMicros, endTimeMicros, numvalues);
+            dac->frameRecorder.getFrameRepeatValues(numvalues,8);
             label = "Frame repeats ";
             ImGui::PlotHistogram(label.c_str(), dac->frameRecorder.values, numvalues, 0, "",0.0f, 5.0f, ImVec2(600,30));
             
-            dac->frameRecorder.getFrameSkipValuesForTime(startTimeMicros, endTimeMicros, numvalues);
+            dac->frameRecorder.getFrameSkipValues(numvalues,8);
             label = "Frame skips ";
             ImGui::PlotHistogram(label.c_str(), dac->frameRecorder.values, numvalues, 0, "",0.0f, 1.0f, ImVec2(600,30));
 

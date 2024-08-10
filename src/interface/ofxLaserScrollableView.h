@@ -8,9 +8,10 @@
 #pragma once
 
 #include "ofMain.h"
+#include "SelectableKeyReceiver.h"
 
 namespace ofxLaser {
-class ScrollableView {
+class ScrollableView : public SelectableKeyReceiver {
     public :
   
     // base class for anything that is a window that can be zoomed and scrolled

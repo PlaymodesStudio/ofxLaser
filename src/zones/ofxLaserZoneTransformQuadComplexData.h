@@ -45,8 +45,10 @@ class ZoneTransformQuadComplexData : public ZoneTransformBase {
     void resetDst(const ofRectangle& rect); 
     void resetDst(glm::vec2 topleft, glm::vec2 topright, glm::vec2 bottomleft, glm::vec2 bottomright);
         
+    virtual glm::vec2 getVectorToBringWithinBoundingBox() override; 
     
-    void updatePoints(vector<glm::vec2*> points);
+    
+    void setFromPoints(vector<glm::vec2*> points);
     //void drag(glm::vec2 dragoffset);
     // resets to perpendicular corners
 //    void resetToSquare() ;

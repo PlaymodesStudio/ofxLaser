@@ -27,6 +27,8 @@ class BezierNode {
     bool setFromAnchorAndControlPoints(glm::vec2 anchor, glm::vec2 cp1, glm::vec2 cp2);
     bool setControlPoints(glm::vec2 cp1, glm::vec2 cp2);
     
+    void translate(glm::vec2 delta); 
+    
    // void draw(glm::vec2 mousePos, float scale);
     
     

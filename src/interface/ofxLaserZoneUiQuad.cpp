@@ -24,12 +24,17 @@ bool ZoneUiQuad ::  updateDataFromUi(OutputZone* outputZone) {
         ofLogError("ZoneUiQuad passed wrong kind of zone transform base!");
         return changed;
     } else {
-        if(isDragging) {
-            zoneQuad->setDstCorners(handles[0], handles[1], handles[3], handles[2]);
-        } else if(mainDragHandleIndex>=0) {
+        //if(isDragging) {
+        //    zoneQuad->setDstCorners(handles[0], handles[1], handles[3], handles[2]);
+        //} else
+        if(mainDragHandleIndex>=0) {
             zoneQuad->moveHandle(mainDragHandleIndex, *getMainDragHandle(), constrainedToSquare && !ofGetKeyPressed(OF_KEY_ALT));
+            changed = true;
+        } else {
+            zoneQuad->setDstCorners(handles[0], handles[1], handles[3], handles[2]);
+            changed = true;
         }
-        return true;
+        return changed;
     }
 }
 

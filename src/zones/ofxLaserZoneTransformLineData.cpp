@@ -16,7 +16,7 @@ using namespace ofxLaser;
 ZoneTransformLineData :: ZoneTransformLineData() {
     
     
-    isDirty = true;
+    setDirty(true);
     
     resetNodes();
     
@@ -40,7 +40,7 @@ void ZoneTransformLineData :: setDefault() {
 }
 
 void ZoneTransformLineData :: paramChanged(ofAbstractParameter& e) {
-    isDirty= true;
+    setDirty(true);
     
 }
 ZoneTransformLineData::~ZoneTransformLineData() {
@@ -84,7 +84,20 @@ bool ZoneTransformLineData::setFromPoints(vector<glm::vec2> points) {
     if(autoSmooth) { //  && changed) {
         updateCurves();
     }
-    isDirty|=changed;
+    
+    
+    if(changed) {
+        setDirty(true); 
+        glm::vec2 delta = getVectorToBringWithinBoundingBox();
+        ofLogNotice("delta : ") << delta;
+        if(glm::length(delta)>0) {
+            for(BezierNode& node : nodes) {
+                node.translate(delta);
+            }
+            
+            
+        }
+    }
     return changed;
     
 }
@@ -112,7 +125,7 @@ bool ZoneTransformLineData :: moveHandle(int handleindex, glm::vec2 newpos) {
             }
         }
         
-        isDirty = true;
+        setDirty(true);
         return true;
     }
     
@@ -141,7 +154,7 @@ void ZoneTransformLineData :: updateCurves () {
         }
             
         glm::vec2 velocity = (next-previous) * scale;
-        ofLogNotice()<< velocity;
+       // ofLogNotice()<< velocity;
         node.setControlPoints(node.getPosition() - velocity, node.getPosition() + velocity );
         
     }
@@ -175,20 +188,18 @@ void ZoneTransformLineData::resetNodes() {
     //nodes[1].reset(400,400);
     nodes[1].reset(608,304);
     nodes[1].end = true;
-    
 }
 
 
 bool ZoneTransformLineData::update(){
-    if(isDirty) {
-        
+    if(getIsDirty()) {
+
         if(autoSmooth) updateCurves();
         
         updateNodes();
         updatePolyline();
         updatePerimeter();
-       
-        isDirty = false;
+        setDirty(false);
         
         return true;
     } else {
@@ -321,6 +332,26 @@ void ZoneTransformLineData :: updatePerimeter() {
     
 }
 
+ofRectangle ZoneTransformLineData::getBoundingBox() {
+    if(!boundingBoxDirty) return boundingBox;
+    vector<glm::vec2> points;
+    for(BezierNode& node : nodes) {
+        points.push_back(node.getPosition());
+    }
+    if(points.size()==0) {
+        boundingBox.set(0,0,0,0);
+    } else {
+        boundingBox.set(points[0], 0,0);
+        for(glm::vec2& p : points) {
+            
+            boundingBox.growToInclude(p);
+        }
+    }
+    
+    boundingBoxDirty = false;
+    return boundingBox;
+
+}
 void ZoneTransformLineData::updateNodes() {
     for(int i = 0; i<nodes.size(); i++) {
         BezierNode& node = nodes[i];
@@ -336,7 +367,7 @@ bool ZoneTransformLineData::deleteNode(int i){
     
     if((i>=0) && (i<nodes.size()) ) {
         nodes.erase(nodes.begin()+i);
-        isDirty = true;
+        setDirty(true);
         return true;
     } else {
         return false;
@@ -357,7 +388,7 @@ void ZoneTransformLineData :: addNode() {
 
    // node.mode = mode;
     
-    isDirty = true;
+    setDirty(true); 
     
 }
 

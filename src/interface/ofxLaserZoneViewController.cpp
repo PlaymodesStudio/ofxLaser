@@ -30,7 +30,7 @@ LaserZoneViewController ::  ~LaserZoneViewController() {
 
 bool LaserZoneViewController :: update() {
 
-    bool wasUpdated = false; //ScrollableView :: update();
+    bool wasUpdated = ScrollableView :: update();
     
     zoomEnabled = !ImGui::GetIO().WantCaptureMouse;
     

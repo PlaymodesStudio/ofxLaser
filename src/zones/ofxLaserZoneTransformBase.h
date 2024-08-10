@@ -10,6 +10,7 @@
 
 #include "ofxLaserPoint.h"
 
+
 namespace ofxLaser {
 	
 class ZoneTransformBase {
@@ -19,7 +20,7 @@ class ZoneTransformBase {
     ZoneTransformBase();
     ~ZoneTransformBase();
     
-    virtual bool update(){return false;};
+    virtual bool update();
 
     // i think keep this to initialise the source rectangle
     virtual void init(){};
@@ -32,27 +33,39 @@ class ZoneTransformBase {
 	virtual bool deserialize(ofJson&jsonGroup) = 0;
 	
     void setDirty(bool state);
+    bool getIsDirty(); 
 
     virtual Point getWarpedPoint(const Point& p) = 0;
     virtual ofPoint getWarpedPoint(const ofPoint& p) = 0;
     virtual ofPoint getUnWarpedPoint(const ofPoint& p) = 0;
+    
+    
 	
     virtual glm::vec2 getCentre() = 0;
+    
+    virtual ofRectangle getBoundingBox(); 
+    
+    virtual glm::vec2 getVectorToBringWithinBoundingBox(); 
 	
     ofParameterGroup transformParams; 
 
     //ofParameter<bool>locked;
 
 	ofRectangle srcRect;
+    ofRectangle boundaryRect; 
 	
 	protected :
 
-	bool isDirty;
-
+	
     bool isConvex;
 	
 	bool initialised = false;
+    ofRectangle boundingBox;
+    bool boundingBoxDirty; 
 	
+    private :
+    bool isDirty;
+
 	
 	
 };
