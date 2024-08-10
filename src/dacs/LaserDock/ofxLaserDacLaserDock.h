@@ -49,7 +49,7 @@ class DacLaserDock : public DacBaseThreaded{
    
     void reset() override;
     void close() override;
-    virtual int getMaxPointBufferSize() override {
+    virtual int getDacTotalPointBufferCapacity() override {
         return 4096;
     }
     

@@ -19,7 +19,7 @@ void DacEtherDreamCommand :: setCommand(char command) {
     appendChar(command);
 }
 
-void DacEtherDreamCommand :: setDataCommand (uint16_t numpoints) {
+void DacEtherDreamCommand :: setAsDataCommand (uint16_t numpoints) {
     clear();
     appendChar('d');
     appendUInt16(numpoints);
@@ -40,14 +40,14 @@ void DacEtherDreamCommand :: addPoint(EtherDreamDacPoint& p) {
 }
 
 
-void DacEtherDreamCommand :: setBeginCommand(uint32_t pointRate) {
+void DacEtherDreamCommand :: setAsBeginCommand(uint32_t pointRate) {
     clear();
     appendChar('b');
     appendUInt16(0);
     appendUInt32(pointRate);
     
 }
-void DacEtherDreamCommand :: setPointRateCommand(uint32_t pointRate) {
+void DacEtherDreamCommand :: setAsPointRateCommand(uint32_t pointRate) {
     clear();
     appendChar('q');
     appendUInt32(pointRate);

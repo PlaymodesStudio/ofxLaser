@@ -21,13 +21,15 @@ class DacBaseThreaded : public DacBase, public ofThread {
     
     // DacBase
     virtual bool sendFrame(const vector<Point>& points) override;
-    virtual bool sendPoints(const vector<Point>& points) override;
+    //virtual bool sendPoints(const vector<Point>& points) override;
     virtual bool setColourShift(float shiftSeconds) override;
     
     virtual string getId() override = 0;
     virtual int getStatus() override = 0;
     virtual bool setPointsPerSecond(uint32_t pps) override = 0;
-    virtual int getMaxPointBufferSize() =0;
+    virtual int getDacTotalPointBufferCapacity() =0;
+    
+    virtual int getMinimumDacBufferFullnessForLatency();
     
     virtual void reset() override = 0;
     virtual void close() override = 0;
@@ -36,9 +38,10 @@ class DacBaseThreaded : public DacBase, public ofThread {
     bool isReadyForFrame(int maxLatencyMS) override;
     
     virtual void logNotice(const string& msg) override {
-        if(logging && lock()) {
+       // if(logging && lock()) {
+        if(logging ){
             ofLogNotice() << msg;
-            unlock();
+            //unlock();
         }
     }
  
@@ -77,22 +80,24 @@ class DacBaseThreaded : public DacBase, public ofThread {
       }
   #endif
     
-    void waitUntilReadyToSend(int maxPointsToFillBuffer);
+    void waitUntilReadyToSend();
     
-    void updateFrameQueue(int minPointsToQueue );
-    int getNumPointsInFrames(deque<DacFrame*>& frames);
+    void updateFrameQueue();
+    int getNumPointsInFrames(deque<std::shared_ptr<DacFrame>>& frames) ;
     // adds a point into the buffer ready to be sent to the DAC
     bool addPointToBuffer(const ofxLaser::Point& point );
 
     int getNumPointsInBufferedFrames();
     int getNumPointsInAllBuffers();
  
-    ofThreadChannel<DacFrame*> frameThreadChannel;
+    ofThreadChannel<std::shared_ptr<DacFrame>> frameThreadChannel;
     
     // buffered frames are all the frames sent but not yet
     // queued to be sent to the DAC
-    deque<DacFrame*> bufferedFrames;
+    deque<std::shared_ptr<DacFrame>> bufferedFrames;
     deque<ofxLaser::Point*> bufferedPoints;
+    std::atomic<int> numBufferedPoints;
+    std::shared_ptr<DacFrame> lastFrame = nullptr;
     
     std::atomic<uint32_t> pps, newPPS;
     
@@ -104,6 +109,10 @@ class DacBaseThreaded : public DacBase, public ofThread {
     // last time a data command was sent
     std::atomic<uint64_t> lastDataSentTime = 0;
     std::atomic<uint64_t> lastDataSentBufferSize= 0;
+    
+    std::atomic<bool> readyForFrame = true;
+    //std::atomic<bool> repeatingFrames = false; 
+//    ofThreadChannel<bool> readyForFrameChannel;
     
 };
 

@@ -16,10 +16,10 @@ class DacEtherDreamCommand : public ByteBuffer {
     
     void clear() override ;
     void setCommand(char command);
-    void setDataCommand (uint16_t numpoints) ;
+    void setAsDataCommand (uint16_t numpoints) ;
     void addPoint(EtherDreamDacPoint& p);
-    void setBeginCommand(uint32_t pointRate);
-    void setPointRateCommand(uint32_t pointRate);
+    void setAsBeginCommand(uint32_t pointRate);
+    void setAsPointRateCommand(uint32_t pointRate);
     void logData();
     
     int numPointsExpected = 0;

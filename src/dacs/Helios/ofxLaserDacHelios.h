@@ -71,7 +71,7 @@ class DacHelios : public DacBase, ofThread{
 	void close() override;
 	
 	bool sendFrame(const vector<Point>& points) override ;
-	bool sendPoints(const vector<Point>& points)  override;
+	//bool sendPoints(const vector<Point>& points)  override;
 	bool setPointsPerSecond(uint32_t pps) override;
     virtual bool setColourShift(float shiftseconds) override { return true; }; // TODO implement here in DAC
     

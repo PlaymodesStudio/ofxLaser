@@ -32,8 +32,10 @@ class DacFrameInfoRecorder {
     void getFrameLatencyValues( int numvalues, int widthpervalue);
     
     void getFrameRepeatValuesForTime(uint64_t starttimemicros, uint64_t endtimemicros, int numvalues) ;
+    void getFrameRepeatValues(int numvalues, int widthpervalue) ;
     void getFrameSkipValuesForTime(uint64_t starttimemicros, uint64_t endtimemicros, int numvalues) ;
-
+    void getFrameSkipValues(int numvalues, int widthpervalue) ;
+   
     deque<FrameAtTime*> frameHistory;
     vector<FrameAtTime*> frameHistoryForTimePeriod;
     ofThreadChannel<FrameAtTime*> frameInfoChannel;

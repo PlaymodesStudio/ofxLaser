@@ -160,12 +160,12 @@ void DacLaserDockNet :: threadedFunction(){
         // But we also use the latency value as we don't want to
         // fill the buffer right up if the time it would take to
         // process those points would be greater than the latency value
-        int maxPointsToFillBuffer = MIN(pointBufferCapacity-minPacketDataSize, maxLatencyMS * pps /1000);
+        //int maxPointsToFillBuffer = MIN(pointBufferCapacity-minPacketDataSize, maxLatencyMS * pps /1000);
         
         
         if(isThreadRunning()) {
     
-            waitUntilReadyToSend(maxPointsToFillBuffer);
+            waitUntilReadyToSend();
             
             //check buffer and send the next points
             // while(!lock()) {}
@@ -228,8 +228,8 @@ inline bool DacLaserDockNet :: sendPointsToDac(){
     int minBufferToFill = maxLatencyMS * pps / 1000;
 
     // if the minimum is more than the maximum buffer size, then reduce it to fit
-    if(minBufferToFill>getMaxPointBufferSize()) {
-        minBufferToFill = getMaxPointBufferSize();
+    if(minBufferToFill>getDacTotalPointBufferCapacity()) {
+        minBufferToFill = getDacTotalPointBufferCapacity();
     }
     
     // the minimum number of points to queue
@@ -239,7 +239,7 @@ inline bool DacLaserDockNet :: sendPointsToDac(){
     int minExpectedSpaceInBuffer = MAX(0, pointBufferCapacity - maxEstimatedBufferFullness );
    
     
-    if(frameMode) {
+    //if(frameMode) {
         
         // calculate the minimum number of extra points to add to the
         // point queue in order to fill the buffer to the necessary level
@@ -248,7 +248,7 @@ inline bool DacLaserDockNet :: sendPointsToDac(){
        
         
        // add points from the frame queue to the bufferedPoints up to that minimum level
-        updateFrameQueue(minPointsToQueue);
+        updateFrameQueue();
 
         totalNumPointsToSend = MIN(bufferedPoints.size(), minExpectedSpaceInBuffer);
        //if(totalNumPointsToSend<2000) totalNumPointsToSend = 0;
@@ -258,10 +258,10 @@ inline bool DacLaserDockNet :: sendPointsToDac(){
             return false;
         }
        // if(verbose) cout << maxEstimatedBufferFullness << " " << currentDacBufferFullnessMin << " " << numpointstosend << endl;
-    } else {
-        // for non-frame mode, just send the buffer
-       totalNumPointsToSend = MIN(bufferedPoints.size(), minExpectedSpaceInBuffer);
-    }
+//    } else {
+//        // for non-frame mode, just send the buffer
+//       totalNumPointsToSend = MIN(bufferedPoints.size(), minExpectedSpaceInBuffer);
+//    }
 
     bool success  = true;
     
@@ -497,7 +497,7 @@ bool DacLaserDockNet :: checkDataPortIncoming() {
             
             //cout << calculateBufferFullnessByTimeAcked() << " " ;
             lastAckTime = ofGetElapsedTimeMicros();
-            lastReportedBufferFullness = getMaxPointBufferSize() - ByteStreamUtils::bytesToUInt16(&inBuffer[2]);
+            lastReportedBufferFullness = getDacTotalPointBufferCapacity() - ByteStreamUtils::bytesToUInt16(&inBuffer[2]);
             
            // cout << lastReportedBufferFullness << endl;
         }
@@ -582,7 +582,7 @@ void DacLaserDockNet :: close() {
 
 }
 
-int DacLaserDockNet::getMaxPointBufferSize() {
+int DacLaserDockNet::getDacTotalPointBufferCapacity() {
     int returnvalue = 0;
     if(lock()) {
         returnvalue = pointBufferCapacity;

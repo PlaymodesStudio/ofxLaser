@@ -15,13 +15,14 @@ DacEtherDream :: DacEtherDream(){
     // I've set it to the number of points in the
     // original etherdream, but this is passed in when
     // the etherdream is initialised
-    pointBufferCapacity = 1799;
+    dacTotalPointBufferCapacity = 1799;
 
     lastCommandSendTime = 0;
     lastAckTime = 0;
     lastDataSentTime = 0;
     
     colourShiftImplemented = true;
+    verbose = false;
 }
 
 
@@ -30,7 +31,6 @@ DacEtherDream :: ~DacEtherDream(){
 	
     // sends stop command, stops the thread, closes the socket
     close();
-    
     
     cleanUpFramesAndPoints();
     
@@ -72,7 +72,7 @@ void DacEtherDream :: setup(string _id, string _ip, EtherDreamData& ed) {
         port += ed.softwareRevision;
     }
     // TODO update max point rate from dacdata
-    pointBufferCapacity = ed.bufferCapacity;
+    dacTotalPointBufferCapacity = ed.bufferCapacity;
  
 	Poco::Timespan timeout( 1 * 1000000); // 1 second timeout
 	
@@ -138,13 +138,12 @@ void DacEtherDream :: threadedFunction(){
     
     bool needToSendPrepare = true;
     
-    
     // in older ether dreams this doesn't seem to reset even if you disconnect and reconnect
-    if(response.status.playback_state == ETHERDREAM_PLAYBACK_PREPARED) resetFlag = true;
+    if(responseThreaded.status.playback_state == ETHERDREAM_PLAYBACK_PREPARED) resetFlag = true;
       
     
     while(isThreadRunning()) {
-        
+       
         if(resetFlag) {
             
             resetFlag = false;
@@ -158,23 +157,25 @@ void DacEtherDream :: threadedFunction(){
             }
             sendStop();
             waitForAck('s');
-            if(response.status.light_engine_state == LIGHT_ENGINE_ESTOP) {
+            if(responseThreaded.status.light_engine_state == LIGHT_ENGINE_ESTOP) {
                 sendClear();
                 waitForAck('c');
             }
             prepareSendCount = 0;
           
+            // could we use a higher level clear ?
             while(bufferedPoints.size()>0) {
                 PointFactory :: releasePoint(bufferedPoints[0]);
                 bufferedPoints.pop_front();
             }
+            numBufferedPoints = 0;
             
             logNotice ("RESET DAC--------------------------------");
            
             
         }
         
-        if((response.status.playback_state == ETHERDREAM_PLAYBACK_IDLE) && (response.status.light_engine_state == LIGHT_ENGINE_READY)) {
+        if((responseThreaded.status.playback_state == ETHERDREAM_PLAYBACK_IDLE) && (responseThreaded.status.light_engine_state == LIGHT_ENGINE_READY)) {
             needToSendPrepare = true;
             logNotice("PLAYBACK IDLE and LIGHT ENGINE READY");
         }
@@ -201,8 +202,9 @@ void DacEtherDream :: threadedFunction(){
             }
         }
         
+        
         // if we're playing and we have a new point rate, send it!
-        if(connected && (response.status.playback_state==ETHERDREAM_PLAYBACK_PLAYING) && (newPPS!=pps)) {
+        if(connected && (responseThreaded.status.playback_state==ETHERDREAM_PLAYBACK_PLAYING) && (newPPS!=pps)) {
             
             if(sendPointRate(newPPS)){
                 pps = (uint32_t)newPPS;
@@ -217,7 +219,7 @@ void DacEtherDream :: threadedFunction(){
             }
         }
         
-        // maxPointsToFillBuffer is the minimum number of points we want
+        // minPointsInBuffer is the minimum number of points we want
         // in the buffer before we send more points.
         // If it's set to zero we would wait a long time before sending
         // points, and potentially risk an underrun.
@@ -229,19 +231,18 @@ void DacEtherDream :: threadedFunction(){
         // But we also use the latency value as we don't want to
         // fill the buffer right up if the time it would take to
         // process those points would be greater than the latency value
-        int maxPointsToFillBuffer = MIN(pointBufferCapacity-minPacketDataSize, maxLatencyMS * pps /1000);
-        if(etherDreamData.softwareRevision>=30) {
-            maxPointsToFillBuffer = MAX(maxPointsToFillBuffer, 256);
-        }
+//        int minPointsInBuffer = MIN(dacTotalPointBufferCapacity-minPacketDataSize, maxLatencyMS * pps /1000);
+//        if(etherDreamData.softwareRevision>=30) {
+//            minPointsInBuffer = MAX(minPointsInBuffer, 256);
+//        }
         // if state is prepared or playing, and we have points in the buffer, then send the points
-        if(connected && (response.status.playback_state!=ETHERDREAM_PLAYBACK_IDLE)) {
-            
-            waitUntilReadyToSend(maxPointsToFillBuffer);
+        if(connected && (responseThreaded.status.playback_state!=ETHERDREAM_PLAYBACK_IDLE)) {
+           
+            waitUntilReadyToSend();
             
             //check buffer and send the next points
-           // while(!lock()) {}
-                bool dataSent = sendPointsToDac();
-            //unlock();
+            bool dataSent = sendPointsToDac();
+             
             if(dataSent) {
                // cout << "DATA SENT " << endl;
                 //if(verbose) logData();
@@ -259,19 +260,19 @@ void DacEtherDream :: threadedFunction(){
             
         } else {
             // get rid of frames!
-            DacFrame* frame;
+            std::shared_ptr<DacFrame>frame;
             while(frameThreadChannel.tryReceive(frame)) {
                 //bufferedFrames.push_back(frame);
                 //newFrame = true;
-                delete frame;
+                //delete frame;
             }
-            
+           
         }
        
 
         // if state is prepared and we have sent enough points and we haven't already, send begin
-        if(connected && (response.status.playback_state==ETHERDREAM_PLAYBACK_PREPARED) && (lastReportedBufferFullness >= maxPointsToFillBuffer)) {
-            logNotice( "Send begin, buffer_fullness : " +ofToString(lastReportedBufferFullness) + " pointBufferMin : " + ofToString(maxPointsToFillBuffer));
+        if(connected && (responseThreaded.status.playback_state==ETHERDREAM_PLAYBACK_PREPARED) && (lastReportedBufferFullness >= getMinimumDacBufferFullnessForLatency())) {
+            logNotice( "Send begin, buffer_fullness : " +ofToString(lastReportedBufferFullness) + " pointBufferMin : " + ofToString(getMinimumDacBufferFullnessForLatency()));
             sendBegin();
             beginSent = waitForAck('b');
             if(beginSent)  {
@@ -295,7 +296,7 @@ void DacEtherDream :: threadedFunction(){
 
 int DacEtherDream :: calculateBufferFullnessByTimeSent() {
     
-    if(response.status.playback_state != ETHERDREAM_PLAYBACK_PLAYING) return lastReportedBufferFullness;
+    if(responseThreaded.status.playback_state != ETHERDREAM_PLAYBACK_PLAYING) return lastReportedBufferFullness;
     
     return DacBaseThreaded::calculateBufferFullnessByTimeSent();
    
@@ -304,16 +305,16 @@ int DacEtherDream :: calculateBufferFullnessByTimeSent() {
 
 int DacEtherDream :: calculateBufferFullnessByTimeAcked() {
    
-    if(response.status.playback_state != ETHERDREAM_PLAYBACK_PLAYING) return lastReportedBufferFullness;
+    if(responseThreaded.status.playback_state != ETHERDREAM_PLAYBACK_PLAYING) return lastReportedBufferFullness;
     return DacBaseThreaded::calculateBufferFullnessByTimeAcked();
 
     
 }
 void DacEtherDream :: reset() {
-	if(lock()) {
+	//if(lock()) {
 		resetFlag = true;
-		unlock();
-	}
+	//	unlock();
+	//}
 	
 }
 
@@ -335,55 +336,26 @@ void DacEtherDream :: closeWhileRunning() {
 
 
 inline bool DacEtherDream :: sendPointsToDac(){
-    
-    
-    // get current buffer
-    int minDacBufferSize = calculateBufferFullnessByTimeAcked();// + calculateBufferSizeByTimeSent()) /2;
-    int bufferSize =  bufferedPoints.size();
-    
-    // get min buffer size
-    int minBufferSize = maxLatencyMS * pps / 1000;
-    // because the newest etherdreams use DMA transfer, they
-    // always need at least 256 bytes in the buffer otherwise
-    // they report a buffer under-run
-    if(etherDreamData.softwareRevision>=30) {
-        minBufferSize = MAX(minBufferSize, 256);
-    }
-    if(minBufferSize>getMaxPointBufferSize()) {
-        minBufferSize = getMaxPointBufferSize();
-    }
-        
-    int minPointsToQueue = MAX(0, minBufferSize - minDacBufferSize - bufferSize);
-    int maxPointsToSend = MAX(0, pointBufferCapacity - calculateBufferFullnessByTimeAcked());// - 256);
-    
-    int numpointstosend = 0;
-    
-    if(frameMode) {
-        
-        updateFrameQueue(minPointsToQueue);
 
-        numpointstosend = MIN(bufferedPoints.size(), maxPointsToSend);
+    updateFrameQueue();
+ 
+    int maxEstimatedBufferFullness = calculateBufferFullnessByTimeAcked();
+    
+    int maxPointsToAdd = MAX(0, getDacTotalPointBufferCapacity() - maxEstimatedBufferFullness);
+    int numpointstoadd = MIN(bufferedPoints.size(), maxPointsToAdd);
+    
+    if(numpointstoadd == 0) return false;
         
-        if(numpointstosend==0) {
-           // if(verbose) logNotice("sendData : no points to send");
-            return false;
-        }
-        //cout << dacBufferFullness << " " << currentDacBufferFullnessMin << " " << numpointstosend << endl;
-    } else {
-        // for non-frame mode, just send the buffer
-       numpointstosend = MIN(bufferedPoints.size(), maxPointsToSend);
-    }
-
-    dacCommand.setDataCommand(numpointstosend);
-	
+    dacCommand.setAsDataCommand(numpointstoadd);
+    	
 	EtherDreamDacPoint& dacPoint = sendPoint;
+    
     int colourShiftPointCount =  (float)pps/10000.0f*colourShift ;
-	for(int i = 0; i<numpointstosend; i++) {
+    
+	for(int i = 0; i<numpointstoadd; i++) {
 		
 		if(bufferedPoints.size()>0) {
-            // pop the point off the front
-            // TODO figure out how to add extra points in the buffer to accommodate the
-            // colour shift
+     
             int pointindex = colourShiftPointCount;
             if(pointindex >= bufferedPoints.size()) pointindex = bufferedPoints.size()-1;
             
@@ -416,6 +388,7 @@ inline bool DacEtherDream :: sendPointsToDac(){
 
             PointFactory :: releasePoint(bufferedPoints[0]); // recycling system
 			bufferedPoints.pop_front(); // no longer destroys point
+            numBufferedPoints--;
 			lastPointSent = dacPoint; //
 		} else  {
             
@@ -455,11 +428,11 @@ inline bool DacEtherDream :: sendPointsToDac(){
         ofLogError("DacEtherDream, incorrect point count sent, expected "+ofToString(dacCommand.numPointsExpected)+", got "+ofToString(dacCommand.numPoints));
     }
     
-	
+    //ofLogNotice("Packet size : ") << dacCommand.numPoints;
 	bool success =  sendCommand(dacCommand);
     if(success) {
         lastDataSentTime = ofGetElapsedTimeMicros();
-        lastDataSentBufferSize = minDacBufferSize + dacCommand.numPoints;
+        lastDataSentBufferSize = maxEstimatedBufferFullness + dacCommand.numPoints;
     }  else {
         logNotice("sendCommand failed!");
         
@@ -487,19 +460,20 @@ EtherDreamData DacEtherDream::getEtherDreamData() {
 }
 
 int DacEtherDream::getLastReportedBufferFullness() {
-    
-    int result = 0;
-    
-    if(isThreadRunning()) {
-        if(lock()) {
-            result = lastReportedBufferFullness;
-            unlock();
-        }
-        
-    } else {
-        result = lastReportedBufferFullness;
-    }
-    return result;
+    return lastReportedBufferFullness.load();
+//
+//    int result = 0;
+//    
+//    if(isThreadRunning()) {
+//        if(lock()) {
+//            result = lastReportedBufferFullness;
+//            unlock();
+//        }
+//        
+//    } else {
+//        result = lastReportedBufferFullness;
+//    }
+//    return result;
     
 }
 
@@ -586,12 +560,16 @@ inline bool DacEtherDream::waitForAck(char command) {
         
         int roundTripTimeMicros  = lastAckTime - lastCommandSendTime;
 		connected = true;
-        response.deserialize(inBuffer);
-        lastReportedBufferFullness = response.status._buffer_fullness;
+        responseThreaded.deserialize(inBuffer);
+        lastReportedBufferFullness = responseThreaded.status._buffer_fullness;
+        
+        playbackState = responseThreaded.status.playback_state;
+        //playbackStateString = responseThreaded.toString();
+        
         if(command == 'd') {
             int numbytes = dacCommand.size()+22;
            
-            stateRecorder.recordStateThreadSafe(lastDataSentTime, response.status.playback_state, lastReportedBufferFullness, roundTripTimeMicros, dacCommand.numPoints, response.status.point_rate, numbytes);
+            stateRecorder.recordStateThreadSafe(lastDataSentTime, responseThreaded.status.playback_state, lastReportedBufferFullness, roundTripTimeMicros, dacCommand.numPoints, responseThreaded.status.point_rate, numbytes);
           
         }
 
@@ -610,19 +588,19 @@ inline bool DacEtherDream::waitForAck(char command) {
         
         
 		
-        if(verbose || (response.response!='a') || (response.status.playback_flags & 0b010) || (lastReportedBufferFullness > pointBufferCapacity)) {// || (command=='p')|| (command=='?')|| (command=='b')) {
-            if(response.response!='a') {
+        if(verbose || (responseThreaded.response!='a') || (responseThreaded.status.playback_flags & 0b010) || (lastReportedBufferFullness > dacTotalPointBufferCapacity)) {// || (command=='p')|| (command=='?')|| (command=='b')) {
+            if(responseThreaded.response!='a') {
                 logNotice("INVALID COMMAND -------------------");
             }
-            if(response.status.playback_flags & 0b010) {
+            if(responseThreaded.status.playback_flags & 0b010) {
                 logNotice("BUFFER UNDERFLOW -------------------");
             }
-            if(lastReportedBufferFullness > pointBufferCapacity) {
+            if(lastReportedBufferFullness > dacTotalPointBufferCapacity) {
                 
                 logNotice("BUFFER OVERFLOW -------------------");
             }
             
-            logNotice("response : "+ ofToString(response.response) +  " command : " + ofToString(response.command) );
+            logNotice("response : "+ ofToString(responseThreaded.response) +  " command : " + ofToString(responseThreaded.command) );
             if(command == 'd') {
                 logNotice("num points sent : " + ofToString(dacCommand.numPoints));
                 logNotice("previousStateBufferFullness : " + ofToString(previousStateBufferFullness));
@@ -633,7 +611,7 @@ inline bool DacEtherDream::waitForAck(char command) {
 
                // dacCommand.logData();
             }
-			logNotice(response.toString());
+			logNotice(responseThreaded.toString());
             
             // EDGE CASE THAT WE NEED TO CATCH :
             
@@ -649,7 +627,7 @@ inline bool DacEtherDream::waitForAck(char command) {
             // send the frame again?
             // or just send a load of blank points at the start of the next points?
             
-            if(response.response=='I') {
+            if(responseThreaded.response=='I') {
 
                 logNotice("INVALID COMMAND : " + ofToString(command));
                 //logData();
@@ -744,11 +722,10 @@ string DacEtherDream :: getId(){
 // TODO could this be a conflict?
 int DacEtherDream :: getStatus(){
 	if(!connected) return OFXLASER_DACSTATUS_ERROR;
-    int status = 0;
-    if(lock()) {
-        status = response.status.playback_state;
-        unlock();
-    }
+    int status = playbackState;
+//    while(responseChannel.tryReceive(response)) ;
+//    
+//    status = response.status.playback_state;
     
 	if(status <=1) return OFXLASER_DACSTATUS_WARNING;
 	else if(status ==2) return OFXLASER_DACSTATUS_GOOD;
@@ -757,17 +734,18 @@ int DacEtherDream :: getStatus(){
 
 
 string DacEtherDream :: getEtherDreamStateString() {
-    string statusstring;
-    if(lock()) {
-        statusstring = response.status.toString();
-        unlock();
-    }
-    return statusstring;
+// todo make a thread
+    return playbackStateString;
+    //    string statusstring;
+//
+//        statusstring = response.status.toString();
+//   
+//    return statusstring;
 }
 
 inline bool DacEtherDream :: sendBegin(){
 	logNotice("sendBegin()");
-    dacCommand.setBeginCommand(pps);
+    dacCommand.setAsBeginCommand(pps);
 	beginSent = sendCommand(dacCommand);
 	return beginSent;
 }
@@ -780,7 +758,7 @@ inline bool DacEtherDream :: sendPrepare(){
 }
 
 inline bool DacEtherDream :: sendPointRate(uint32_t rate){
-    dacCommand.setPointRateCommand(rate);
+    dacCommand.setAsPointRateCommand(rate);
 	return sendCommand(dacCommand);
 }
 
@@ -874,6 +852,7 @@ void DacEtherDream :: close() {
     
     if(isThreadRunning()) {
         if(connected) {
+            // lock to make sure other thread isn't also trying to send anything
             if(lock()) {
                 sendStop();
                 unlock();
@@ -888,13 +867,22 @@ void DacEtherDream :: close() {
 
 }
 
-int DacEtherDream::getMaxPointBufferSize() {
-    int returnvalue = 0;
-    if(lock()) {
-        returnvalue = pointBufferCapacity;
-        unlock();
+int DacEtherDream::getDacTotalPointBufferCapacity() {
+    return dacTotalPointBufferCapacity;
+}
+
+
+int DacEtherDream::getMinimumDacBufferFullnessForLatency() {
+    int minDacBufferFullness = DacBaseThreaded :: getMinimumDacBufferFullnessForLatency();
+    // because the newest etherdreams use DMA transfer, they
+    // always need at least 256 bytes in the buffer otherwise
+    // they report a buffer under-run
+    if(etherDreamData.softwareRevision>=30) {
+        minDacBufferFullness = MAX(minDacBufferFullness, 256);
     }
-    return returnvalue;
+
+    return minDacBufferFullness;
+    
 }
 
 bool DacEtherDream::setPointsPerSecond(uint32_t newpps){
@@ -903,14 +891,14 @@ bool DacEtherDream::setPointsPerSecond(uint32_t newpps){
         pps = newPPS = newpps;
         return true;
     } else {
-        while(!lock());
+       // while(!lock());
         newPPS = newpps;
         if (!beginSent) {
             pps = (uint32_t)newPPS; // pps rate will get sent with begin anyway
-            unlock();
+            //unlock();
             return true;
         } else {
-            unlock();
+           // unlock();
             return false;
         }
     }

@@ -140,7 +140,7 @@ void DacLaserDock :: threadedFunction(){
     while(isThreadRunning()) {
         
         
-        int pointBufferMin = MIN(getMaxPointBufferSize(), maxLatencyMS * pps /1000);
+       // int pointBufferMin = MIN(getDacTotalPointBufferCapacity(), maxLatencyMS * pps /1000);
         
         if(connected) {
             
@@ -162,7 +162,7 @@ void DacLaserDock :: threadedFunction(){
             
         }
         
-        waitUntilReadyToSend(pointBufferMin);
+        waitUntilReadyToSend();
         // returns false if it doesn't work
         if(!sendPointsToDac()) {
             if(!connected) {
@@ -185,28 +185,28 @@ inline bool DacLaserDock::sendPointsToDac() {
     // get min buffer size
     int minBufferSize = maxLatencyMS * pps / 1000;
     
-    int pointBufferCapacity = getMaxPointBufferSize();
+    int pointBufferCapacity = getDacTotalPointBufferCapacity();
     
     int minPointsToQueue = MAX(0, minBufferSize - minDacBufferSize - bufferSize);
     int maxPointsToSend = MAX(0, pointBufferCapacity - calculateBufferFullnessByTimeAcked());
     
     int numpointstosend = 0;
     
-    if(frameMode) {
+    //if(frameMode) {
         
-        updateFrameQueue(minPointsToQueue);
+    updateFrameQueue();
 
-        numpointstosend = MIN(bufferedPoints.size(), maxPointsToSend);
-        
-        if(numpointstosend==0) {
-            if(verbose) ofLogNotice("sendData : no points to send");
-            return false;
-        }
-        //cout << dacBufferFullness << " " << currentDacBufferFullnessMin << " " << numpointstosend << endl;
-    } else {
-        // for non-frame mode, just send the buffer
-       numpointstosend = MIN(bufferedPoints.size(), maxPointsToSend);
+    numpointstosend = MIN(bufferedPoints.size(), maxPointsToSend);
+    
+    if(numpointstosend==0) {
+        if(verbose) ofLogNotice("sendData : no points to send");
+        return false;
     }
+        //cout << dacBufferFullness << " " << currentDacBufferFullnessMin << " " << numpointstosend << endl;
+//    } else {
+//        // for non-frame mode, just send the buffer
+//       numpointstosend = MIN(bufferedPoints.size(), maxPointsToSend);
+//    }
 
     dacCommand.clear();
    

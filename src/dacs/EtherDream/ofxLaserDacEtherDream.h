@@ -51,11 +51,40 @@ public:
     void close() override;
     void reset() override;
    
-    int getMaxPointBufferSize() override;
+    int getDacTotalPointBufferCapacity() override;
     // estimate the current dac buffer fullness based on the last time points were sent
     virtual int calculateBufferFullnessByTimeSent() override;
     // estimate the current dac buffer fullness based on the last time points were acknowledged
     virtual int calculateBufferFullnessByTimeAcked() override;
+    
+    virtual int getMinimumDacBufferFullnessForLatency() override;
+    
+//    int calculateMinimumPointsToSend() {
+//
+//        int maxEstimatedBufferFullness = calculateBufferFullnessByTimeAcked();
+//        //int minEstimatedBufferFullness = calculateBufferFullnessByTimeSent();
+//        
+//        
+//        // get min buffer fullness required to maintain latency
+//        int minDacBufferFullness = maxLatencyMS * pps / 1000;
+//        
+//        // because the newest etherdreams use DMA transfer, they
+//        // always need at least 256 bytes in the buffer otherwise
+//        // they report a buffer under-run
+//        if(etherDreamData.softwareRevision>=30) {
+//            minDacBufferFullness = MAX(minDacBufferFullness, 256);
+//        }
+//        if(minDacBufferFullness>getDacTotalPointBufferCapacity()) {
+//            minDacBufferFullness = getDacTotalPointBufferCapacity();
+//        }
+//        
+//        int numPointsAvailable =  bufferedPoints.size();
+//        int minPointsToAdd = MAX(0, minDacBufferFullness - maxEstimatedBufferFullness - numPointsAvailable);
+//        int maxPointsToAdd = MAX(0, dacTotalPointBufferCapacity - maxEstimatedBufferFullness);
+//        
+//        
+//    }
+        
    
     //output the data that we just sent to the console - for debugging
     void logData();
@@ -93,7 +122,7 @@ protected:
     
     // the maximum number of points the etherdream can hold.
     // in etherdream v1 it's 1799, higher for later models.
-    int pointBufferCapacity;
+    std::atomic<int> dacTotalPointBufferCapacity;
     
     // remember the last point sent (so we know where the scanners are in
     // case of a hold up)
@@ -104,8 +133,10 @@ protected:
     
     // the response from the last send. Used to keep track of play state,
     // TODO - playbackstate should probably be stored somewhere else.
-    DacEtherDreamResponse response;
-
+    DacEtherDreamResponse responseThreaded;
+    //ofThreadChannel<DacEtherDreamResponse> responseChannel;
+    std::atomic<int> playbackState;
+    string playbackStateString; 
     // stores command data, is replaced every time a command is sent
     // (it also manages the byte serialization process)
     // this could potentially be converted into a vector so as to

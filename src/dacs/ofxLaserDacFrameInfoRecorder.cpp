@@ -120,6 +120,52 @@ void DacFrameInfoRecorder :: getFrameLatencyValues( int numvalues, int widthperv
     
 }
 
+void DacFrameInfoRecorder :: getFrameSkipValues(int numvalues, int widthpervalue) {
+    
+    int startindex = frameHistory.size() - (numvalues/widthpervalue);
+    int maxvalue = frameHistory.size()-1;
+    int skipCount = 0;
+    for (int i =0; i<numvalues; i++) {
+        
+        int index = ofClamp(startindex + (i/widthpervalue), 0, maxvalue);
+        
+        if(maxvalue >-1) {
+            FrameAtTime* frameInfo =frameHistory[index];
+            
+            skipCount = frameInfo->skipped;
+            values[i] = skipCount;
+        } else {
+            values[i] = 0;
+        }
+        
+    }
+}
+
+
+void DacFrameInfoRecorder :: getFrameRepeatValues(int numvalues, int widthpervalue) {
+    
+    int startindex = frameHistory.size() - (numvalues/widthpervalue);
+    int maxvalue = frameHistory.size()-1;
+    int repeatCountForFrame = 0;
+    for (int i =0; i<numvalues; i++) {
+        
+        int index = ofClamp(startindex + (i/widthpervalue), 0, maxvalue);
+        
+        if(maxvalue >-1) {
+            FrameAtTime* frameInfo =frameHistory[index];
+            
+            repeatCountForFrame = frameInfo->repeatCount;
+            values[i] = repeatCountForFrame;
+        } else {
+            values[i] = 0;
+        }
+        
+    }
+}
+
+
+
+
 void DacFrameInfoRecorder :: getFrameRepeatValuesForTime(uint64_t starttimemicros, uint64_t endtimemicros, int numvalues) {
     
     getStateHistoryForTimePeriod(starttimemicros, endtimemicros); // updates stateHistoryForTimePeriod

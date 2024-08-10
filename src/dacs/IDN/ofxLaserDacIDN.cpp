@@ -74,9 +74,9 @@ bool DacIDN :: sendFrame(const vector<Point>& points) {
     return true;
 };
 
-bool DacIDN :: sendPoints(const vector<Point>& points) {
-	return false;
-};
+//bool DacIDN :: sendPoints(const vector<Point>& points) {
+//	return false;
+//};
 
 bool DacIDN :: setPointsPerSecond(uint32_t newpps) {
 	pps = newpps;

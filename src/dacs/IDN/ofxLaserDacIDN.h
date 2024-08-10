@@ -48,7 +48,7 @@ class DacIDN : public DacBase, ofThread {
 	void setup(string ip);
 	
 	bool sendFrame(const vector<Point>& points) override;
-	bool sendPoints(const vector<Point>& points) override;
+	//bool sendPoints(const vector<Point>& points) override;
 	bool setPointsPerSecond(uint32_t pps) override;
 	
 	string getId() override {

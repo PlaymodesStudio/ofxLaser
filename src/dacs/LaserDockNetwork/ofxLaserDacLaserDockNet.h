@@ -56,7 +56,7 @@ public:
     
     bool checkDataPortIncoming(); 
    
-    int getMaxPointBufferSize() override;
+    int getDacTotalPointBufferCapacity() override;
 //    // estimate the current dac buffer fullness based on the last time points were sent
 //    virtual int calculateBufferSizeByTimeSent() override;
 //    // estimate the current dac buffer fullness based on the last time points were acknowledged

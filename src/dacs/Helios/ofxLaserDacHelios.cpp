@@ -31,7 +31,7 @@ DacHelios:: DacHelios() {
 	pps = 30000;
 	newPPS = 30000;
 	
-	frameMode = true;
+	//frameMode = true;
 	
 	connected = false;
     newArmed = false;  // as in the PPS system, this knows
@@ -137,7 +137,7 @@ bool DacHelios:: sendFrame(const vector<Point>& points){
 	    
     
 	// add all points into the frame object
-	frameMode = true;
+	//frameMode = true;
     for(const ofxLaser::Point& p : points) {
         frame->addPoint(p);
     }
@@ -164,28 +164,28 @@ bool DacHelios:: sendFrame(const vector<Point>& points){
 }
 
 
-bool DacHelios::sendPoints(const vector<Point>& points) {
-	
-    // sends a point stream. So far very un-tested for this DAC
-    
-	if(!connected) return false;
-    
-	// get frame object
-
-	DacHeliosFrame* frame = getFrame();
-	
-	// add all points into the frame object
-	frameMode = false;
-	frame->addPoint(lastPoint);
-	for(ofxLaser::Point p : points) {
-		frame->addPoint(p);
-		lastPoint = p; 
-	}
-	// add the frame object to the frame channel
-	framesChannel.send(frame);
-	
-	return true;
-};
+//bool DacHelios::sendPoints(const vector<Point>& points) {
+//	
+//    // sends a point stream. So far very un-tested for this DAC
+//    
+//	if(!connected) return false;
+//    
+//	// get frame object
+//
+//	DacHeliosFrame* frame = getFrame();
+//	
+//	// add all points into the frame object
+//	frameMode = false;
+//	frame->addPoint(lastPoint);
+//	for(ofxLaser::Point p : points) {
+//		frame->addPoint(p);
+//		lastPoint = p; 
+//	}
+//	// add the frame object to the frame channel
+//	framesChannel.send(frame);
+//	
+//	return true;
+//};
 
 bool DacHelios::setPointsPerSecond(uint32_t newpps) {
 	ofLog(OF_LOG_NOTICE, "setPointsPerSecond " + ofToString(newpps));
@@ -264,8 +264,10 @@ void DacHelios :: threadedFunction(){
                 // note that it's a while, not an if, so we keep pulling off
                 // frames as long as there is a new one - that way we
                 // don't get a build up of frames
-				while( (frameMode || nextFrame==nullptr ) &&
-					 (framesChannel.tryReceive(newFrame)) ) {
+				//while( (frameMode || nextFrame==nullptr ) &&
+				//	 (framesChannel.tryReceive(newFrame)) ) {
+                
+                while(framesChannel.tryReceive(newFrame))  {
                     // we have a new frame, so delete the old one and store it
 					if(nextFrame!=nullptr) {
 						deleteFrame(nextFrame);
@@ -341,8 +343,9 @@ void DacHelios :: threadedFunction(){
                     // the frame in single mode.
                     
                     // if we're not armed send the blank samples
-                    result = dacDevice->SendFrame(pps, frameMode ? HELIOS_FLAGS_DEFAULT : HELIOS_FLAGS_SINGLE_MODE, armed ? currentFrame->samples : blankFrame.samples, currentFrame->numSamples);
-                    
+                    //result = dacDevice->SendFrame(pps, frameMode ? HELIOS_FLAGS_DEFAULT : HELIOS_FLAGS_SINGLE_MODE, armed ? currentFrame->samples : blankFrame.samples, currentFrame->numSamples);
+                    result = dacDevice->SendFrame(pps, HELIOS_FLAGS_DEFAULT, armed ? currentFrame->samples : blankFrame.samples, currentFrame->numSamples);
+                   
                     if(result!=HELIOS_SUCCESS) {
                         ofLogNotice("LaserDacHelios thread SendFrame attempt " + ofToString(attempts) + " failed - error " + ofToString(result));
                     }

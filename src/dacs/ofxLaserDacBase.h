@@ -23,7 +23,7 @@ namespace ofxLaser {
         ~DacBase() {}; 
 		
 		virtual bool sendFrame(const vector<Point>& points)  = 0;
-		virtual bool sendPoints(const vector<Point>& points)  = 0;
+		//virtual bool sendPoints(const vector<Point>& points)  = 0;
 		virtual bool setPointsPerSecond(uint32_t pps)  = 0;
         virtual bool setColourShift(float shiftSeconds) = 0;
 		virtual string getId() = 0;
@@ -69,7 +69,7 @@ namespace ofxLaser {
         // only used to know if the frame is ready
         int calculationTimeMS = 10;
         // minimum buffer to send at once
-        int minPacketDataSize = 256;
+        int minPacketDataSize = 128;
         int maxPointRate = 60000; 
         
         bool colourShiftImplemented = false;
@@ -80,12 +80,11 @@ namespace ofxLaser {
 	protected :
 	
 		vector<ofAbstractParameter*> displayData;
-		bool resetFlag = false;
+		std::atomic<bool> resetFlag = false;
         bool armed = false;
-        bool frameMode = true;
-        //string alias = "";
+       // bool frameMode = true;
         
-        float colourShift = 0;
+        std::atomic<float> colourShift = 0;
         int lastStatus = OFXLASER_DACSTATUS_NO_DAC;
         
 
