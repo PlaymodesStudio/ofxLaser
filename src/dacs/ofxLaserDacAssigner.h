@@ -47,7 +47,7 @@ class DacAssigner {
     static DacAssigner * instance();
     static DacAssigner * dacAssigner;
     
-    DacAssigner();
+    DacAssigner() ;
     ~DacAssigner();
     
     bool update(); 
@@ -63,9 +63,11 @@ class DacAssigner {
     DacData& getDacDataForLabel(const string& label);
     DacData& getDacDataForLaser(Laser& laser);
     
-    DacManagerBase* getManagerForType(string type); 
+    std::unique_ptr<DacManagerBase>& getManagerForType(string type);
 
-    vector<DacManagerBase*> dacManagers;
+    vector<std::unique_ptr<DacManagerBase>> dacManagers;
+    std::unique_ptr<DacManagerBase> nullDacManager{nullptr};
+    
     vector<DacData> dacDataList;
     //vector<DacBase*> dacs; 
     DacData emptyDacData;

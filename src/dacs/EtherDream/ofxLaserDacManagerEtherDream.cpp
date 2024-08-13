@@ -178,12 +178,12 @@ vector<DacData> DacManagerEtherDream :: updateDacList(){
 }
 
 
-DacBase* DacManagerEtherDream :: getAndConnectToDac(const string& id){
+std::shared_ptr<DacBase> DacManagerEtherDream :: getAndConnectToDac(const string& id){
     
     // returns a dac - if failed returns nullptr.
     
-    DacEtherDream* dac = (DacEtherDream*) getDacById(id);
-    if(dac!=nullptr) {
+    std::shared_ptr<DacBase> dac = getDacById(id);
+    if(dac) {
         ofLogNotice("DacManagerEtherDream :: getAndConnectToDac(...) - Already a dac made with id "+ofToString(id));
         return dac;
     }
@@ -191,29 +191,13 @@ DacBase* DacManagerEtherDream :: getAndConnectToDac(const string& id){
     if(etherdreamDataByMacAddress.find(id)!=etherdreamDataByMacAddress.end()) {
         EtherDreamData& ed = etherdreamDataByMacAddress.at(id);
         // MAKE DAC
-        dac = new DacEtherDream();
-        dac->setup(id, ed.ipAddress, ed);
-        dacsById[id] = dac;
-        return dac;
+        DacEtherDream* edac = new DacEtherDream();
+        edac->setup(id, ed.ipAddress, ed);
+        dacsById.emplace(std::make_pair(id, edac));
+        return dacsById[id];
     } else {
         return nullptr;
     }
-}
-
-bool DacManagerEtherDream :: disconnectAndDeleteDac(const string& id){
-    
-    DacEtherDream* dac = (DacEtherDream*)getDacById(id);
-    if(dac==nullptr) {
-        ofLogError("DacManagerEtherDream::disconnectAndDeleteDac("+id+") - dac not found");
-        return false;
-    }
-   
-    dac->close();
-    auto it=dacsById.find(id);
-    dacsById.erase(it);
-    delete dac;
-    return true;
-    
 }
 
 

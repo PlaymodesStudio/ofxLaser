@@ -12,7 +12,8 @@ using namespace ofxLaser;
 
 Laser::Laser(int _index) {
     laserIndex = _index;
-    dac = &emptyDac;
+    emptyDac = std::make_shared<DacEmpty>();
+    dac = emptyDac;
     
     laserHomePosition = ofPoint(400,400);
     testPatternActive = false;
@@ -43,7 +44,7 @@ Laser::~Laser() {
     //delete gui;
 }
 
-void Laser::setDac(DacBase* newdac){
+void Laser::setDac(std::shared_ptr<DacBase>  newdac){
     if(dac!=newdac) {
         dac = newdac;
         newdac->setPointsPerSecond(pps);
@@ -55,16 +56,16 @@ void Laser::setDac(DacBase* newdac){
     }
 }
 
-DacBase* Laser::getDac(){
+std::shared_ptr<DacBase> Laser::getDac(){
     return dac;
 }
 
 bool Laser::hasDac() {
-    return (dac != &emptyDac);
+    return dac.get() != emptyDac.get();
 }
 
 void Laser::setDacDiagnostics(bool state) {
-    DacBaseThreaded* dac =  dynamic_cast<DacBaseThreaded*> (getDac());
+    std::shared_ptr<DacBaseThreaded> dac = std::dynamic_pointer_cast<DacBaseThreaded> (getDac());
     if(dac!=nullptr) {
         dac->setDiagnosticsRecording(state); 
     }
@@ -73,15 +74,24 @@ void Laser::setDacDiagnostics(bool state) {
 
 
 bool Laser::removeDac(){
-    if (dac != &emptyDac) {
-        dac = &emptyDac;
+    
+    if(dac) {
+        dac = emptyDac;
         dacLabel = "";
-        //dacAlias = "";
         return true;
-    }
-    else {
+    } else {
         return false;
     }
+//
+//    if (dac != &emptyDac) {
+//        dac = &emptyDac;
+//        dacLabel = "";
+//        //dacAlias = "";
+//        return true;
+//    }
+//    else {
+//        return false;
+//    }
 }
 
 int Laser::getPointRate() {
@@ -155,7 +165,7 @@ void Laser :: init() {
     pps.addListener(this, &Laser::ppsChanged);
     colourChangeShift.addListener(this, &Laser::colourShiftChanged);
     
-    
+ 
     dac->setPointsPerSecond(pps);
     // error checking on blank shift for older config files
     if(colourChangeShift<0) colourChangeShift = 0;
@@ -549,7 +559,7 @@ string Laser :: getLabel() {
 }
 
 string Laser::getDacLabel() {
-    if(dac!=&emptyDac) {
+    if(dac) {
         return dac->getId();
     } else {
         return "";
@@ -559,7 +569,7 @@ string Laser::getDacLabel() {
 
 int Laser::getDacConnectedState() {
     
-    if((dac!=nullptr)&&(dac!=&emptyDac)) {
+    if(dac) {
         return dac->getStatus();
     } else {
         return OFXLASER_DACSTATUS_NO_DAC;

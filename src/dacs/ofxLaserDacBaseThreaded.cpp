@@ -52,6 +52,8 @@ int DacBaseThreaded :: calculateBufferFullnessByTimeAcked() {
 
 void DacBaseThreaded :: waitUntilReadyToSend(){
 
+    if(pps==0) return; // bit of a hack but let's make sure the thread keeps going
+    
     int minPointsInBuffer = getMinimumDacBufferFullnessForLatency(); // MIN(getDacTotalPointBufferCapacity()-minPacketDataSize, maxLatencyMS * pps /1000);
     
     int bufferFullness = calculateBufferFullnessByTimeSent();
@@ -252,19 +254,7 @@ bool DacBaseThreaded::setColourShift(float shift)  {
     
     colourShift = shift;
     return true;
-//
-//    if(!isThreadRunning()){
-//        colourShift =shift;
-//        return true;
-//    } else {
-//        if(lock()){
-//            colourShift = shift;
-//            unlock();
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
+
     
 }
 

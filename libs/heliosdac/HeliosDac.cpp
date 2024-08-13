@@ -31,7 +31,7 @@ HeliosDacDevice::HeliosDacDevice(libusb_device_handle* handle)
 	
 	closed = true;
 	usbHandle = handle;
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	//std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	//std::lock_guard<std::mutex>lock(frameLock);
 
 	int actualLength = 0;

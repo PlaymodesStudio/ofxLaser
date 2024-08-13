@@ -27,6 +27,12 @@ void DacLaserDock :: close() {
         
         // also stops the thread
         waitForThread(true, 1000); // 1 second timeout
+        waitForThread(true);
+        if(isThreadRunning()) {
+            ofLogError("DacLaserDock :: close - timed out!");
+            
+            
+        }
     }
     if(dacDevice!=nullptr) {
         delete dacDevice;
@@ -61,6 +67,7 @@ bool DacLaserDock::setup(libusb_device* usbdevice){
     
     // should ensure that pps get set
     pps = 0;
+    ppsSent = false;
 
     //
 //    cout << "Device Status:" << device->status() << endl;
@@ -153,6 +160,7 @@ void DacLaserDock :: threadedFunction(){
                     unlock();
                     if(dacDevice->set_dac_rate(newPPS)) {
                         pps = (uint32_t)newPPS;
+                        ppsSent = true;
                     } else {
                         // ?? do something?
                     }
@@ -161,18 +169,18 @@ void DacLaserDock :: threadedFunction(){
             
             
         }
-        
-        waitUntilReadyToSend();
-        // returns false if it doesn't work
-        if(!sendPointsToDac()) {
-            if(!connected) {
-                
-              // try to reconnect?
+        if(ppsSent) {
+            waitUntilReadyToSend();
+            // returns false if it doesn't work
+            if(!sendPointsToDac()) {
+                if(!connected) {
+                    
+                    // try to reconnect?
+                }
+                // connected = false;
+                //ofLogError("laserdock sendpoints error");
             }
-           // connected = false;
-            //ofLogError("laserdock sendpoints error");
         }
-        
     }
     
 }

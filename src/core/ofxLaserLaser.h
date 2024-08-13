@@ -45,8 +45,8 @@ class Laser {
     void reset();
     
     string getLabel();
-    void setDac(DacBase* dac);
-    DacBase* getDac();
+    void setDac(std::shared_ptr<DacBase> dac);
+    std::shared_ptr<DacBase> getDac();
     bool removeDac();
     
     bool hasDac(); 
@@ -219,7 +219,7 @@ class Laser {
     ofMesh previewPathMesh;
     ofMesh previewPathColoured;
 
-    DacEmpty emptyDac;
+    std::shared_ptr<DacEmpty> emptyDac;
  
     //-----------------------------------
     protected :
@@ -228,7 +228,7 @@ class Laser {
   
     void setDacArmed(bool& armed);
 
-    DacBase* dac;
+    std::shared_ptr<DacBase> dac;
     
     ofPoint laserHomePosition;
      

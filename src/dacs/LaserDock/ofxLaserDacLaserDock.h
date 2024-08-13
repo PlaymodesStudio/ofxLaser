@@ -81,6 +81,7 @@ class DacLaserDock : public DacBaseThreaded{
 	uint32_t maxPPS; 
 	
 	bool connected = false;
+    bool ppsSent = false; 
     
 
 };

@@ -450,9 +450,9 @@ void ManagerBase:: update(){
     
     dacAssigner.update();
     
-    for(ofxLaser::Laser* laser : lasers) {
-        laser->emptyDac.dontCalculate = dontCalculateDisconnected.get();
-    }
+//    for(ofxLaser::Laser* laser : lasers) {
+//        laser->emptyDac.dontCalculate = dontCalculateDisconnected.get();
+//    }
     
     //if(useBitmapMask) laserMask.update();
     // delete all the shapes - all shape objects need a destructor!

@@ -2558,11 +2558,11 @@ void Manager::guiDacAnalytics(int dacIndex) {
         
 
         
-        DacBaseThreaded* dac =  dynamic_cast<DacBaseThreaded*> (laser->getDac());
+        std::shared_ptr<DacBaseThreaded> dac =  std::dynamic_pointer_cast<DacBaseThreaded> (laser->getDac());
         if(dac!=nullptr) {
             
             
-            DacEtherDream* dacEtherDream =  dynamic_cast<DacEtherDream*> (laser->getDac());
+            std::shared_ptr<DacEtherDream> dacEtherDream =  std::dynamic_pointer_cast<DacEtherDream> (dac);
             
             if(dacEtherDream!=nullptr) {
               

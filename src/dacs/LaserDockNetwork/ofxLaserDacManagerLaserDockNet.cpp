@@ -217,12 +217,12 @@ vector<DacData> DacManagerLaserDockNet :: updateDacList(){
 }
 
 
-DacBase* DacManagerLaserDockNet :: getAndConnectToDac(const string& id){
+std::shared_ptr<DacBase> DacManagerLaserDockNet :: getAndConnectToDac(const string& id){
     
     // returns a dac - if failed returns nullptr.
 
-    DacLaserDockNet* dac = (DacLaserDockNet*) getDacById(id);
-    if(dac!=nullptr) {
+    std::shared_ptr<DacBase> dac = getDacById(id);
+    if(dac) {
         ofLogNotice("DacManagerLaserDockNet :: getAndConnectToDac(...) - Already a dac made with id "+ofToString(id));
         return dac;
     }
@@ -230,30 +230,15 @@ DacBase* DacManagerLaserDockNet :: getAndConnectToDac(const string& id){
     if(dacStatusById.find(id)!=dacStatusById.end()) {
         DacLaserDockNetStatus& status = dacStatusById.at(id);
         // MAKE DAC
-        dac = new DacLaserDockNet();
-        dac->setup(id, status.ip_address, status);
-        dacsById[id] = dac;
-        return dac;
+        DacLaserDockNet* edac = new DacLaserDockNet();
+        edac->setup(id, status.ip_address, status);
+        dacsById.emplace(std::make_pair(id, edac));
+        return dacsById[id];
     } else {
         return nullptr;
     }
 }
 
-bool DacManagerLaserDockNet :: disconnectAndDeleteDac(const string& id){
-    
-    DacLaserDockNet* dac = (DacLaserDockNet*)getDacById(id);
-    if(dac==nullptr) {
-        ofLogError("DacManagerLaserDockNet::disconnectAndDeleteDac("+id+") - dac not found");
-        return false;
-    }
-   
-    dac->close();
-    auto it=dacsById.find(id);
-    dacsById.erase(it);
-    delete dac;
-    return true;
-    
-}
 
 
 

@@ -38,7 +38,7 @@ vector<DacData> DacManagerHelios :: updateDacList(){
    
     // add data for dacs we already know about
     for(auto& dacpair : dacsById) {
-        DacHelios* heliosdac = (DacHelios*) dacpair.second;
+        std::shared_ptr<DacHelios> heliosdac = std::dynamic_pointer_cast<DacHelios>(dacpair.second);
         DacData data(getType(), heliosdac->dacName);
         daclist.push_back(data);
 
@@ -58,7 +58,7 @@ vector<DacData> DacManagerHelios :: updateDacList(){
         libusb_device *usbdevice = libusb_device_list[i];
         bool dacalreadyinuse = false;
         for(auto dacpair : dacsById) {
-            DacHelios* dac = (DacHelios*)dacpair.second; 
+            std::shared_ptr<DacHelios> dac = std::dynamic_pointer_cast<DacHelios>(dacpair.second);
             //dac->dacDevice;
             if(dac->usbDevice == usbdevice) {
                 cout << "found dac already in use " << dac->dacName << endl;
@@ -91,13 +91,14 @@ vector<DacData> DacManagerHelios :: updateDacList(){
 }
 
 
-DacBase* DacManagerHelios :: getAndConnectToDac(const string& id){
+std::shared_ptr<DacBase> DacManagerHelios :: getAndConnectToDac(const string& id){
     
     // returns a dac - if failed returns nullptr.
     
-    DacHelios* dac = (DacHelios*) getDacById(id);
+    //std::shared_ptr<DacHelios> dac = std::dynamic_pointer_cast<DacHelios>(dacpair.second);
+    std::shared_ptr<DacBase> dac =  getDacById(id);
     
-    if(dac!=nullptr) {
+    if(dac) {
         ofLogNotice("DacManagerHelios :: getAndConnectToDac(...) - Already a dac made with id "+ofToString(id));
         return dac;
     }
@@ -117,14 +118,15 @@ DacBase* DacManagerHelios :: getAndConnectToDac(const string& id){
         
         if (getHeliosSerialNumber(libusb_device) == id) {
             // check serial number, if it matches, then make a dac with it!
-            dac = new DacHelios();
-            if(!dac->setup(libusb_device)){ // *************************************
-                delete dac;
-                dac = nullptr;
+            DacHelios* hdac = new DacHelios();
+            if(!hdac->setup(libusb_device)){
+                delete hdac;
+                
                 
             } else {
                 // STORE DAC!
-                dacsById[id] = dac;
+                dacsById.emplace(std::make_pair(id, hdac));
+                dac = getDacById(id);
             }
             break; 
 
@@ -136,21 +138,6 @@ DacBase* DacManagerHelios :: getAndConnectToDac(const string& id){
     
     
     return dac;
-}
-
-bool DacManagerHelios :: disconnectAndDeleteDac(const string& id){
-    
-    if ( dacsById.count(id) == 0 ) {
-        ofLogError("DacManagerHelios::disconnectAndDeleteDac("+id+") - dac not found");
-        return false;
-    }
-    DacHelios* dac = (DacHelios*) dacsById.at(id);
-    dac->close();
-    auto it=dacsById.find(id);
-    dacsById.erase(it);
-    delete dac;
-    return true; 
-    
 }
 
 

@@ -66,14 +66,16 @@ vector<DacData> DacManagerLaserDock :: updateDacList(){
 }
 
 
-DacBase* DacManagerLaserDock :: getAndConnectToDac(const string& id){
+std::shared_ptr<DacBase> DacManagerLaserDock :: getAndConnectToDac(const string& id){
     
     // returns a dac - if failed returns nullptr.
     
-    DacLaserDock* dac = (DacLaserDock*) getDacById(id);
     
-    if(dac!=nullptr) {
-        ofLogNotice("DacManagerLaserdock :: getAndConnectToDac(...) - Already a dac made with id "+ofToString(id));
+    //std::shared_ptr<DacHelios> dac = std::dynamic_pointer_cast<DacHelios>(dacpair.second);
+    std::shared_ptr<DacBase> dac =  getDacById(id);
+    
+    if(dac) {
+        ofLogNotice("DacManagerHelios :: getAndConnectToDac(...) - Already a dac made with id "+ofToString(id));
         return dac;
     }
     
@@ -92,15 +94,16 @@ DacBase* DacManagerLaserDock :: getAndConnectToDac(const string& id){
         
         if (getLaserdockSerialNumber(libusb_device) == id) {
             // check serial number, if it matches, then make a dac with it!
-            dac = new DacLaserDock();
-            if(!dac->setup(libusb_device)){
-                delete dac;
-                dac = nullptr;
+            DacLaserDock* hdac = new DacLaserDock();
+            if(!hdac->setup(libusb_device)){
+                delete hdac;
                 
             } else {
                 // STORE DAC!
-                dacsById[id] = dac;
+                dacsById.emplace(std::make_pair(id, hdac));
+                dac = getDacById(id);
             }
+            break;
 
         }
     }
@@ -110,22 +113,9 @@ DacBase* DacManagerLaserDock :: getAndConnectToDac(const string& id){
     
     
     return dac;
-}
-
-bool DacManagerLaserDock :: disconnectAndDeleteDac(const string& id){
     
-    if ( dacsById.count(id) == 0 ) {
-        ofLogError("DacManagerLaserdock::disconnectAndDeleteDac("+id+") - dac not found");
-        return false;
-    }
-    DacLaserDock* dac = (DacLaserDock*) dacsById.at(id);
-    dac->close();
-    auto it=dacsById.find(id);
-    dacsById.erase(it);
-    delete dac; 
-    return true;
+    
 }
-
 
 string DacManagerLaserDock :: getLaserdockSerialNumber(libusb_device* usbdevice) {
     // make a descriptor object to store the data in

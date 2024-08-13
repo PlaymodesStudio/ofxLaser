@@ -81,9 +81,9 @@ DacAssigner :: DacAssigner() {
 //    }
     //dacAliasManager.save();
     
-    dacManagers.push_back(new DacManagerLaserDock());
-    dacManagers.push_back(new DacManagerHelios());
-    dacManagers.push_back(new DacManagerEtherDream());
+    dacManagers.push_back(std::unique_ptr<DacManagerBase>(new DacManagerLaserDock()));
+    dacManagers.push_back(std::unique_ptr<DacManagerBase>(new DacManagerHelios()));
+    dacManagers.push_back(std::unique_ptr<DacManagerBase>(new DacManagerEtherDream()));
     //dacManagers.push_back(new DacManagerLaserDockNet());
     updateDacList();
 	
@@ -96,7 +96,7 @@ DacAssigner :: ~DacAssigner() {
 
 bool DacAssigner :: update() {
     bool changed = false;
-    for(DacManagerBase* dacManager : dacManagers) {
+    for(std::unique_ptr<DacManagerBase>& dacManager : dacManagers) {
         if(dacManager->checkDacsChanged()) changed = true;
     }
     
@@ -114,7 +114,7 @@ const vector<DacData>& DacAssigner ::updateDacList(){
     // get a new list of dacdata
     vector<DacData> newdaclist;
     
-    for(DacManagerBase* dacManager : dacManagers) {
+    for(std::unique_ptr<DacManagerBase>& dacManager : dacManagers) {
         // ask every dac manager for an updated list of DacData objects
         // and insert them into our new vector.
         vector<DacData> newdacs = dacManager->updateDacList();
@@ -157,7 +157,7 @@ const vector<DacData>& DacAssigner ::updateDacList(){
                 // become available.
                 // So let's get the dac and assign it to the laser!
                 if(!dacdata.available && (dacdata.assignedLaser!=nullptr)) {
-                    DacBase* dacToAssign = getManagerForType(dacdata.type)->getAndConnectToDac(dacdata.id);
+                    std::shared_ptr<DacBase> dacToAssign = getManagerForType(dacdata.type)->getAndConnectToDac(dacdata.id);
                     if(dacToAssign!=nullptr) {
                         //dacToAssign->setAlias(dacdata.alias);
                         dacdata.assignedLaser->setDac(dacToAssign);
@@ -239,7 +239,7 @@ bool DacAssigner ::assignToLaser(const string& daclabel, Laser& laser){
     
   
     // get manager for type
-    DacManagerBase* manager = getManagerForType(dacdata.type);
+    std::unique_ptr<DacManagerBase>& manager = getManagerForType(dacdata.type);
     if(manager==nullptr) {
         ofLogError("DacAssigner ::assignToLaser - invalid type " + dacdata.type);
         return false;
@@ -249,7 +249,7 @@ bool DacAssigner ::assignToLaser(const string& daclabel, Laser& laser){
     // if laser already has a dac then delete it!
     disconnectDacFromLaser(laser);
     
-    DacBase* dacToAssign = nullptr;
+    std::shared_ptr<DacBase> dacToAssign;
     
     if(dacdata.assignedLaser!=nullptr) {
         // remove from current laser
@@ -308,7 +308,7 @@ bool DacAssigner :: disconnectDacFromLaser(Laser& laser) {
     if(dacData.assignedLaser!=nullptr) {
         dacData.assignedLaser = nullptr;
         laser.removeDac();
-        ofxLaser::DacManagerBase* manager = getManagerForType(dacData.type);
+        std::unique_ptr<DacManagerBase>&  manager = getManagerForType(dacData.type);
         if(manager!=nullptr) manager->disconnectAndDeleteDac(dacData.id);
         else {
             ofLogNotice("Error - disconnected non existent dac ");
@@ -318,15 +318,15 @@ bool DacAssigner :: disconnectDacFromLaser(Laser& laser) {
         return false;
     }
 }
-DacManagerBase* DacAssigner :: getManagerForType(string type){
-    for(DacManagerBase* manager : dacManagers) {
-        if(manager->getType() == type) {
-            return manager;
+std::unique_ptr<DacManagerBase>& DacAssigner :: getManagerForType(string type){
+    for(std::unique_ptr<DacManagerBase>& dacManager : dacManagers) {
+        if(dacManager->getType() == type) {
+            return dacManager;
             
             break;
         }
     }
-    return nullptr;
+    return nullDacManager;
     
 }
 

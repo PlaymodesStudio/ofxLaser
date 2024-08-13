@@ -21,8 +21,8 @@ class DacManagerHelios : public DacManagerBase{
     DacManagerHelios();
     ~DacManagerHelios();
     virtual vector<DacData> updateDacList() override;
-    virtual DacBase* getAndConnectToDac(const string& id) override;
-    virtual bool disconnectAndDeleteDac(const string& id) override;
+    virtual std::shared_ptr<DacBase>  getAndConnectToDac(const string& id) override;
+    
     virtual string getType() override {
         return "Helios";
     }
