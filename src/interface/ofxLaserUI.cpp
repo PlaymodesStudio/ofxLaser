@@ -393,11 +393,31 @@ bool addIntDrag(ofParameter<int>&param, float speed, const char* format, string 
         return false;
     }
                                                                                                
-                                                                                               
 }
 
 
-
+bool UI::addFloatAsIntDrag(float&value, float min, float max, float multiplier, float speed, string label) {
+    
+  
+    bool shiftpressed =ofGetKeyPressed(OF_KEY_SHIFT);
+    bool showfloat = shiftpressed;
+    if(floor(value)!=value) showfloat = true;
+  
+    if(addFloatDrag(label, value, shiftpressed? 0.01f : speed, min, max, showfloat? "%.2f" : "%.0f")){
+        
+        if(shiftpressed) {
+        } else {
+            value = roundf(value);
+        }
+        //param.set(ofClamp(value, param.getMin(), param.getMax()));
+        
+        return true;
+    } else {
+        return false;
+    }
+    
+    
+}
 bool UI::addFloatAsIntDrag(ofParameter<float>&param, float multiplier, float speed, string labelSuffix) {
     
     string label = param.getName()+labelSuffix;
@@ -409,13 +429,9 @@ bool UI::addFloatAsIntDrag(ofParameter<float>&param, float multiplier, float spe
     bool showfloat = shiftpressed;
     if(floor(value)!=value) showfloat = true;
   
-    if(addFloatDrag(label, value, shiftpressed? 0.01f : speed, param.getMin(), param.getMax(), showfloat? "%.2f" : "%.0f")){
+    if(addFloatAsIntDrag(value, param.getMin(), param.getMin(), multiplier, speed, label)){
         
-        if(shiftpressed) {
-        } else {
-            value = roundf(value);
-        }
-        param.set(ofClamp(value, param.getMin(), param.getMax()));
+        param.set(value);
         
         return true;
     } else {
@@ -1529,3 +1545,19 @@ glm::vec3 UI::getScaleFromMatrix(const glm::mat4& m) {
 }
 
 
+void UI :: drawImGuiTexture(GLuint& textureid, int x, int y, int w, int h, bool sameLine){
+    
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 offset = ImGui::GetWindowPos();
+    int newx =x+offset.x;
+    int newy =y+offset.y;
+    
+    draw_list->PushTextureID(GetImTextureID(textureid));
+    draw_list->PrimReserve(6, 4);
+    draw_list->PrimRectUV(ImVec2(newx,newy), ImVec2(newx+w,newy+h), ImVec2(0,0), ImVec2(1,1),ImGui::GetColorU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)));
+    
+    draw_list->PopTextureID();
+    ImGui::SetCursorPosX(x+w);
+    if(!sameLine) ImGui::SetCursorPosY(y+h);
+    
+}

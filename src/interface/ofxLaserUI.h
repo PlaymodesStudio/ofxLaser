@@ -92,7 +92,7 @@ class UI {
     static bool addFloatDrag(ofParameter<float>&param, float speed=1, const char* format="%.2f", string labelSuffix = "");
     static bool addIntDrag(ofParameter<int>&param, float speed=1, const char* format="%d", string labelSuffix = "");
     static bool addFloatAsIntDrag(ofParameter<float>&param, float multiplier, float speed=1, string labelSuffix="");
-    
+    static bool addFloatAsIntDrag(float&value, float min, float max, float multiplier, float speed=1, string label="");
     static bool addFloat2Drag(ofParameter<glm::vec2>&param, float speed=1, const char* format="%.2f", string labelSuffix = "");
     static bool addFloat3Drag(ofParameter<glm::vec3>&param, float speed=1, const char* format="%.2f", string labelSuffix = "");
     
@@ -231,7 +231,10 @@ class UI {
     
     static glm::vec3 getScaleFromMatrix(const glm::mat4& m);
     
-    static string imguiSavePath; 
+    static void drawImGuiTexture(GLuint& textureid, int x, int y, int w, int h, bool sameLine = false);
+   
+    
+    static string imguiSavePath;
     
 };
 
