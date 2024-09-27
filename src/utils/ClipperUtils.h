@@ -34,17 +34,17 @@ class ClipperUtils {
     
     
 //    static bool isElementInsideElement(BaseGraphicElement* elementToCheck, BaseGraphicElement* element);
-//    static  bool isElementInsideElements(BaseGraphicElement* elementToCheck, vector<BaseGraphicElement*>& elements);
+//    static  bool isElementInsideElements(BaseGraphicElement* elementToCheck, vector<std::shared_ptr<BaseGraphicElement>>& elements);
 //
 //    static bool doesElementIntersectElement(BaseGraphicElement* element1, BaseGraphicElement* element2);
-//    static bool doesElementIntersectElements(BaseGraphicElement* element1, vector<BaseGraphicElement*>& elements);
+//    static bool doesElementIntersectElements(BaseGraphicElement* element1, vector<std::shared_ptr<BaseGraphicElement>>& elements);
 //
 
     
 //    static bool pointWithinMask(ElementPoint* element, ClipperLib::Paths& clipperMasks);
 //
 //
-////    static vector<BaseGraphicElement*>  combineElements(vector<BaseGraphicElement*>& elements, ClipperLib::ClipType cliptype );
+////    static vector<std::shared_ptr<BaseGraphicElement>>  combineElements(vector<std::shared_ptr<BaseGraphicElement>>& elements, ClipperLib::ClipType cliptype );
 //
 //    static ElementPolyline* polylineToElement(ofPolyline& polyline);
 

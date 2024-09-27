@@ -346,13 +346,10 @@ void Visualiser3D :: draw(const ofRectangle& rect, const vector<Laser*>& lasers,
             ofMesh laserMesh;
             
             for(int i = 1; i<points.size(); i++) {
-                
-                
+ 
                 const glm::vec3& lp1 = points[i-1];
                 const glm::vec3& lp2 = points[i];
-               
-                
-                
+          
                 ofFloatColor colour1 = ofFloatColor(colours[i-1]); // lp1.getColour();
                 ofFloatColor colour2 = ofFloatColor(colours[i]);//lp2.getColour()*brightnessfactor;
                 
@@ -370,8 +367,8 @@ void Visualiser3D :: draw(const ofRectangle& rect, const vector<Laser*>& lasers,
                 
                 p2.rotate(ofMap(lp2.y, flipY ? 800 : 0, flipY? 0 : 800, -laser3D.verticalRangeDegrees/2, laser3D.horizontalRangeDegrees/2)+ laser3D.orientation.get().x, ofPoint(-1,0,0));
                
-                p1.rotate(ofMap(lp1.x, flipX ? 800 : 0, flipX? 0 : 800, -laser3D.horizontalRangeDegrees/2, laser3D.horizontalRangeDegrees/2) + laser3D.orientation.get().y, ofPoint(0,1,0));
-                p2.rotate(ofMap(lp2.x, flipX ? 800 : 0, flipX? 0 : 800, -laser3D.horizontalRangeDegrees/2, laser3D.horizontalRangeDegrees/2)+ laser3D.orientation.get().y, ofPoint(0,1,0));
+                p1.rotate(ofMap(lp1.x, !flipX ? 800 : 0, !flipX? 0 : 800, -laser3D.horizontalRangeDegrees/2, laser3D.horizontalRangeDegrees/2) + laser3D.orientation.get().y, ofPoint(0,1,0));
+                p2.rotate(ofMap(lp2.x, !flipX ? 800 : 0, !flipX? 0 : 800, -laser3D.horizontalRangeDegrees/2, laser3D.horizontalRangeDegrees/2)+ laser3D.orientation.get().y, ofPoint(0,1,0));
                 
                 ofPoint beamNormal = p1.getNormalized();
                 ofPoint cameraNormal = ofPoint(laser3D.position)-camera.getGlobalPosition();

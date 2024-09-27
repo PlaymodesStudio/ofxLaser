@@ -424,6 +424,35 @@ void ManagerBase::drawPolys(const vector<ofPolyline>& polys, vector<vector<ofCol
     
 }
 
+void ManagerBase::drawPolysFromPoints(const vector<vector<glm::vec3>>& allPoints, vector<vector<ofColor>>&allColours, string profileName, float brightness) {
+    
+    if(allPoints.size()!=allColours.size()) {
+        ofLogError("ManagerBase::drawPolysFromPoints - mismatched polys / colours lengths");
+        return ;
+    }
+    
+    // TODO - vector of closed!
+    bool closed = false;
+    
+    int id = getNextId();
+    for(int i = 0; i<allPoints.size() ; i++ ) {
+        
+        ofxLaser::Polyline* poly = getPolyFromPoints(allPoints[i], allColours[i], closed, profileName, brightness);
+        poly->id = id;
+        if(poly->getLength()>0.1) {
+            currentShapeTarget->addShape(poly, useClipRectangle, clipRectangle);
+        } else {
+            delete poly;
+        }
+    }
+    
+    
+    //ofxLaser::Polylines* polylines = new ofxLaser::Polylines();
+    //TODO ******
+    
+}
+
+
 
 void ManagerBase::drawLaserGraphic(Graphic& graphic, float brightness, string renderProfile) {
     

@@ -50,7 +50,7 @@ void ClipperUtils :: addShapeToMasks(ofxLaser::Shape* element, ClipperLib::Paths
 
     } catch(...) {
         ofLogError("Clipper error!");
-        //return ; // vector<BaseGraphicElement*> { element};
+        //return ; // vector<std::shared_ptr<BaseGraphicElement>> { element};
     }
 
 
@@ -95,7 +95,7 @@ void ClipperUtils :: addShapesToMasks(vector<ofxLaser::Shape*> elements, Clipper
 
     } catch(...) {
         ofLogError("Clipper error!");
-        //return ; // vector<BaseGraphicElement*> { element};
+        //return ; // vector<std::shared_ptr<BaseGraphicElement>> { element};
     }
 
 
@@ -218,8 +218,10 @@ ClipperLib::Path ClipperUtils :: shapeToClipper(ofxLaser::Shape* shape) {
     
     // open closed paths
     if(path.size()>2) {
+        // OK SO THIS SOMETIMES CAUSES PROBLEMS ***** KEEP AN EYE ON IT
         if(path.front()==path.back()) {
-            path.back().X-=1;
+            path.back().X+=1;
+            path.back().Y-=1;
         }
         
 //
@@ -387,7 +389,7 @@ vector<ofxLaser :: Shape*> ClipperUtils :: clipperPathsToShapes(vector<ClipperLi
 //    return true;
 //}
 //
-//bool ClipperUtils::isElementInsideElements(BaseGraphicElement* elementToCheck, vector<BaseGraphicElement*>& maskPolylines) {
+//bool ClipperUtils::isElementInsideElements(BaseGraphicElement* elementToCheck, vector<std::shared_ptr<BaseGraphicElement>>& maskPolylines) {
 //    for(BaseGraphicElement* maskpoly : maskPolylines) {
 //        if(isElementInsideElement(elementToCheck, maskpoly)) return true;
 //    }
@@ -424,8 +426,8 @@ vector<ofxLaser :: Shape*> ClipperUtils :: clipperPathsToShapes(vector<ClipperLi
 //
 //}
 //
-//bool ClipperUtils::doesElementIntersectElements(BaseGraphicElement* element1, vector<BaseGraphicElement*>& elements) {
-//    for(BaseGraphicElement* element : elements) {
+//bool ClipperUtils::doesElementIntersectElements(BaseGraphicElement* element1, vector<std::shared_ptr<BaseGraphicElement>>& elements) {
+//    for(std::shared_ptr<BaseGraphicElement>& element : elements) {
 //        if(doesElementIntersectElement(element1, element)) return true;
 //    }
 //    return false;
@@ -433,9 +435,9 @@ vector<ofxLaser :: Shape*> ClipperUtils :: clipperPathsToShapes(vector<ClipperLi
 //
 //
 ////
-////vector<BaseGraphicElement*> Patch::subtractElements(BaseGraphicElement* elementToSubtract, BaseGraphicElement* element) {
+////vector<std::shared_ptr<BaseGraphicElement>> Patch::subtractElements(BaseGraphicElement* elementToSubtract, BaseGraphicElement* element) {
 ////
-////    vector<BaseGraphicElement*> returnelements;
+////    vector<std::shared_ptr<BaseGraphicElement>> returnelements;
 ////
 ////    clipper.Clear();
 ////    try {
@@ -463,7 +465,7 @@ vector<ofxLaser :: Shape*> ClipperUtils :: clipperPathsToShapes(vector<ClipperLi
 ////        ofLogError("Clipper error!");
 ////
 ////        return returnelements;
-////       //return vector<BaseGraphicElement*> { element};
+////       //return vector<std::shared_ptr<BaseGraphicElement>> { element};
 ////    }
 ////
 ////
@@ -472,7 +474,7 @@ vector<ofxLaser :: Shape*> ClipperUtils :: clipperPathsToShapes(vector<ClipperLi
 
 
 ////
-////vector<BaseGraphicElement*> ClipperUtils :: combineElements(vector<BaseGraphicElement*>& elements, ClipperLib::ClipType cliptype ) {
+////vector<std::shared_ptr<BaseGraphicElement>> ClipperUtils :: combineElements(vector<std::shared_ptr<BaseGraphicElement>>& elements, ClipperLib::ClipType cliptype ) {
 ////
 ////    if(elements.size()<2) {
 ////        return {};
@@ -502,7 +504,7 @@ vector<ofxLaser :: Shape*> ClipperUtils :: clipperPathsToShapes(vector<ClipperLi
 ////
 ////
 ////    OpenPathsFromPolyTree(out, paths);
-////    vector<BaseGraphicElement*> newelements = clipperPathsToElements(paths, elements[0]);
+////    vector<std::shared_ptr<BaseGraphicElement>> newelements = clipperPathsToElements(paths, elements[0]);
 ////
 ////    return newelements;
 ////}

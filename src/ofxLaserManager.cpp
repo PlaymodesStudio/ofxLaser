@@ -771,6 +771,9 @@ void Manager::drawLaserGui() {
     guiCustomParameters();
     
     Laser* currentLaser = getSelectedLaser();
+    
+    vector<ZoneId> zonesToRemove;
+    vector<ZoneId> zonesToAdd;
         
         // TODO check null laser
     if(overlayIconsVisible) {
@@ -897,9 +900,11 @@ void Manager::drawLaserGui() {
                     }
                     if(ImGui::Button(zoneid.getLabel().c_str())) {
                         if(hasZone) {
-                            laser.removeZone(zoneid);
+//                            laser.removeZone(zoneid);
+                            zonesToRemove.push_back(zoneid);
                         } else {
-                            laser.addZone(zoneid);
+                            //laser.addZone(zoneid);
+                            zonesToAdd.push_back(zoneid);
                         }
                         
                     }
@@ -1195,6 +1200,15 @@ void Manager::drawLaserGui() {
     guiCopyLaserSettings();
     
     guiZoneSettings();
+    Laser& laser = *getSelectedLaser();
+    for(ZoneId& zoneid : zonesToRemove) {
+        laser.removeZone(zoneid);
+    }
+    
+    for(ZoneId& zoneid : zonesToAdd) {
+        laser.addZone(zoneid);
+    }
+    
     
 }
 
