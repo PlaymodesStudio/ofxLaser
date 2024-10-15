@@ -13,6 +13,7 @@
 #include "ofxLaserPoint.h"
 #include "opencv2/calib3d/calib3d.hpp"
 #include "ofxLaserWarper.h"
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/closest_point.hpp>
 
 #include "ofxLaserGeomUtils.h"

@@ -1022,8 +1022,3 @@ void ManagerBase::addProjector() {
     throw;
     
 }
-// DEPRECATED, showAdvanced parameter now redundant
-void ManagerBase::initGui(bool showAdvanced) {
-    ofLogError("ManagerBase::initGui(bool showAdvanced) initGui is no longer required");
-    throw;
-}

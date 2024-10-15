@@ -1124,7 +1124,7 @@ void Laser ::getAllShapePoints(const vector<ZoneContent>& zonesContent, vector<P
             //ofLogError("missing zone content for zone!");
             continue;
         }
-        int idindex = findZoneContentIndexForId(outputZone->getZoneId(), zonesContent);
+        int idindex =/* 0;*/findZoneContentIndexForId(outputZone->getZoneId(), zonesContent);
         if(idindex<0) continue;
 
         const ZoneContent& zoneContent = zonesContent[idindex];

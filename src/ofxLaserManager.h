@@ -6,12 +6,6 @@
 
 #pragma once
 #include "ofxLaserManagerBase.h"
-#include "ofxLaserUI.h"
-#include "ofxLaserVisualiser3D.h"
-#include "ofxLaserZoneViewController.h"
-#include "ofxLaserCanvasViewController.h"
-#include "ofxLaserIconSVGs.h"
-#include "GlobalScale.h"
 
 #define OFX_LASER_HIDE_CANVAS false
 
@@ -50,62 +44,19 @@ class Manager : public ManagerBase {
     virtual void serialize(ofJson& json) override;
     virtual bool deserialize(ofJson& json) override;
 
-    ofRectangle getPreviewRect();
-    float getPreviewScale();
-    glm::vec2 getPreviewOffset();
-
-    ofRectangle getZonePreviewRect();
-    ofRectangle getCanvasPreviewRect();
-    ofRectangle getVisualiserPreviewRect();
-    
-    bool updateDisplayRectangle(); 
     bool setDisplayRectangle(int x, int y, int w, int h);
 
     bool setOverlayIconsVisible(bool state); 
     
     virtual void setCanvasSize(int width, int height) override;
-    virtual bool deleteCanvasZone(InputZone* inputZone) override;
    
     void selectNextLaser();
     void selectPreviousLaser();
     int getLaserIndex(Laser* laser); 
     int getSelectedLaserIndex();
-    void setSelectedLaserIndex(int i);
     Laser* getSelectedLaser();
     
-
-    
-    LaserZoneViewController*  getCurrentLaserViewController();
-    LaserZoneViewController*  getLaserViewControllerByIndex(int index);
-   
-    void drawUI();
-    void drawPreviews();
-    
-    void renderPreview();
-   
     glm::vec2 screenToLaserInput(glm::vec2& pos);
-    
-    void drawLaserGui();
-    void startLaserUI() ;
-    void finishLaserUI() ;
-    
-    void guiMenuBar();
-    void guiTopBar(int ypos);
-    void guiDacAssignment();
-    void guiLaserOverview();
-    void guiLaserSettings(ofxLaser::Laser* laser);
-    //void guiLaserOutputSettings();
-    void guiZoneSettings();
-    
-    void guiCopyLaserSettings();
-    void drawGuiAllDacAnalytics(); 
-    void guiDacAnalytics(int index);
-    void guiCustomParameters();
-    void guiShowLaserZoneContextMenu(); 
-    
-    // pop ups
-    bool guiDeleteLaserButtonAndPopup(Laser* laser, int index);
-    void guiEditDacAliasButtonAndPopup(string daclabel);
 
     ofParameter<bool> showCustomParametersWindow;
     ofParameter<bool> showLaserOverviewWindow;
@@ -115,43 +66,11 @@ class Manager : public ManagerBase {
     bool showDacAssignmentWindow;
     bool showBeamZoneSortWindow;
     
-    bool toggleGui();
-    void setGuiVisible(bool visible);
-    bool isGuiVisible();
-    
-    bool isGuiMouseDisabled();
-    void setGuiMouseDisabled(bool state);
-    
-    void drawBigNumber(int number); 
-    
-    void mouseEntered(ofMouseEventArgs &e);
-    void mouseExited(ofMouseEventArgs &e);
-    
-    void mouseMoved(ofMouseEventArgs &e);
-    bool mousePressed(ofMouseEventArgs &e);
-    bool mouseReleased(ofMouseEventArgs &e);
-    bool mouseDragged(ofMouseEventArgs &e);
-    void mouseScrolled(ofMouseEventArgs &e);
-  
-    bool keyPressed(ofKeyEventArgs &e);
-    bool keyReleased(ofKeyEventArgs &e);
-
-    void setDefaultPreviewOffsetAndScale();
-    void setLaserDefaultPreviewOffsetAndScale(int lasernum);
-     
     //----------- DEPRECATED ------------------------
     
     OF_DEPRECATED_MSG("ofxLaser::Manager::nextProjector - use selectNextLaser() ", void nextProjector());
     OF_DEPRECATED_MSG("ofxLaser::Manager::previousProjector - use selectPreviousLaser() ", void previousProjector());
 
-    int guiLaserSettingsPanelWidth;
-    int guiSpacing;
-    int menuBarHeight = 20;
-    int iconBarHeight = 32;
-    bool enableCanvasFunctionality = true;
-    bool overlayIconsVisible = true;
-    
-    
     ofParameterGroup interfaceParams;
     ofParameterGroup customParams;
     ofParameter<bool> zoneGridSnap;
@@ -177,23 +96,12 @@ class Manager : public ManagerBase {
     
     bool autoSizeToScreen = true;
   
-    vector<LaserZoneViewController> laserZoneViews;
-    CanvasViewController canvasViewController;
-   
-    
     protected :
     
     bool initialised = false;
     bool windowActive = true; 
    
     int selectedLaserIndex;
-
-    bool guiIsVisible;
-    bool guiIsMouseDisabled;
-    bool showEditScannerPreset = false;
-    
-    Visualiser3D visualiser3D;
-    ofRectangle visualiser3DRect; 
     
     DacData dacToAssign;
     ofxLaser::Laser* laserToAssign = nullptr;
@@ -201,9 +109,6 @@ class Manager : public ManagerBase {
     //ofImage guideImage;
   
      
-    PresetManager<ScannerSettings> scannerPresetManager;
-    PresetManager<ColourSettings> colourPresetManager;
-    
     // copy settings system :
     // TODO Break into its own object
     // is actually an array of booleans
@@ -216,10 +121,6 @@ class Manager : public ManagerBase {
     
     ofRectangle displayRectangle;
     
-    
-    IconSVGs iconSVGs; 
-   
-
 };
 }
 

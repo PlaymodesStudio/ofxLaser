@@ -6,10 +6,9 @@
 //
 
 #include "ofxLaserDacBaseThreaded.h"
+#include "unistd.h"
 
 using namespace ofxLaser;
-
-
 
 bool DacBaseThreaded :: sendFrame(const vector<Point>& points){
 

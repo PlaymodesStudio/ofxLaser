@@ -9,6 +9,7 @@
 #pragma once
 
 #include "ofMain.h"
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/closest_point.hpp>
 
 namespace ofxLaser {

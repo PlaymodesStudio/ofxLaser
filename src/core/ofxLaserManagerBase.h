@@ -29,7 +29,6 @@
 #include "ClipperUtils.h"
 
 namespace ofxLaser {
-class UI;
 
 class ManagerBase : public TransformationManager {
     
@@ -149,19 +148,6 @@ class ManagerBase : public TransformationManager {
     bool isLaserArmed(unsigned int i);
 	bool areAllLasersArmed();
     
-    void beginDraw() {
-        // to do : check target
-        ofViewport((ofGetWidth()-canvasTarget.getWidth())/-2, (ofGetHeight()-canvasTarget.getHeight())/-2, ofGetWidth(), ofGetHeight()) ;
-        ofPushMatrix();
-        ofTranslate((ofGetWidth()-canvasTarget.getWidth())/2, (ofGetHeight()-canvasTarget.getHeight())/2);
-        
-    }
-    void endDraw() {
-        ofPopMatrix();
-        ofViewport(0,0,ofGetWidth(), ofGetHeight());
-    }
-    
-    
     int getNextId();
     //--------------------------------------------------------
     
@@ -184,6 +170,8 @@ class ManagerBase : public TransformationManager {
     ofParameter<float>globalBrightness;
 
     BitmapMaskManager laserMask;
+    
+    ShapeTargetCanvas &getCanvasTarget(){return canvasTarget;};
     
                 
   //  bool zonesChanged;

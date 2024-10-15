@@ -6,7 +6,6 @@
 //
 
 #pragma once 
-#include "ofxLaserQuadGui.h"
 #include "ofxLaserPolygonBase.h"
 
 namespace ofxLaser {

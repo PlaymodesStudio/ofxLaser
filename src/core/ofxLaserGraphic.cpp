@@ -12,42 +12,6 @@ using namespace ofxLaser;
 int Graphic::numGraphicsInMemory = 0;
 
 
-void Graphic :: addSvgFromFile(string filename, bool optimise, bool subtractFills) {
-    filename = ofToDataPath(filename);
-
-    ofBuffer buffer = ofBufferFromFile(filename);
-    
-    addSvgFromString(buffer.getText(), optimise, subtractFills);
-	
-}
-
-void Graphic :: addSvgFromString(string data, bool optimise, bool subtractFills) {
-
-    ofxSVGExtra svg;
-    svg.loadFromString(data);
-    addSvg(svg, optimise, subtractFills);
-}
-
-void Graphic :: addSvg(ofxSVGExtra& svg, bool optimise, bool subtractFills) {
-    
-    const vector <ofPath> & paths = svg.getPaths();
-    
-    for (ofPath path : svg.getPaths()){
-        addPath(path, false, subtractFills, true);
-    }
-    
-    if(optimise) {
-        connectLineSegments();
-        // if we subtracted fills then the lines were optimised already
-        if(!subtractFills) {
-            for(size_t i= 0; i<polylines.size(); i++) {
-                polylines[i]->simplify(0.2);
-            }
-        }
-    }
-    
-    
-}
 void Graphic::subtractPathFromPolylines(ofPath& sourcepath) {
 	
 	if(polylines.size()==0) return;
