@@ -35,6 +35,7 @@
 //#include "ofxLaserDacManagerLaserDockNet.h"
 #include "ofxLaserDacManagerEtherDream.h"
 #include "ofxLaserDacManagerHelios.h"
+#include "ofxLaserDacManagerAudio.h"
 #include "ofxLaserDacAliasManager.h"
 
 namespace ofxLaser {

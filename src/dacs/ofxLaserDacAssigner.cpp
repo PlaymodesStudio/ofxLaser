@@ -84,6 +84,7 @@ DacAssigner :: DacAssigner() {
     dacManagers.push_back(std::unique_ptr<DacManagerBase>(new DacManagerLaserDock()));
     dacManagers.push_back(std::unique_ptr<DacManagerBase>(new DacManagerHelios()));
     dacManagers.push_back(std::unique_ptr<DacManagerBase>(new DacManagerEtherDream()));
+    dacManagers.push_back(std::unique_ptr<DacManagerBase>(new DacManagerAudio()));
     //dacManagers.push_back(new DacManagerLaserDockNet());
     updateDacList();
 	
