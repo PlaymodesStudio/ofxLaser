@@ -717,7 +717,7 @@ bool ManagerBase::loadSettings() {
     
     
     // reset the global brightness setting, despite what was in the settings.
-    globalBrightness = 0.2;
+    globalBrightness = 1.0;
 
     // NOW load the lasers
     
