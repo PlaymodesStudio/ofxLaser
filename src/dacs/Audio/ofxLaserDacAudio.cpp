@@ -57,8 +57,11 @@ ofSoundStreamSettings DacAudio::defaultSettings(ofSoundDevice device) {
     // TODO: We may want to get the closest to some specific sample rate here.
     // For now, we just use the highest supported rate.
     if (!device.sampleRates.empty()) {
-        settings.sampleRate = 48000;//device.sampleRates[device.sampleRates.size() - 1];
+        settings.sampleRate = device.sampleRates[device.sampleRates.size() - 1];
     }
+    
+    settings.sampleRate = 48000;
+    
     return settings;
 }
 
@@ -128,6 +131,7 @@ void DacAudio::audioOut(ofSoundBuffer& buffer) {
 
     // Write the points to the `samples` buffer.
     size_t points_to_write = MIN(required_points, buffered.size());
+//    size_t points_to_write = MAX(required_points, frame.size());
     samples.resize(points_to_write * channels);
     laserPointsToInterleavedAudio(buffered, points_to_write, samples, channels);
     buffered.erase(buffered.begin(), buffered.begin() + points_to_write);
@@ -166,7 +170,7 @@ bool DacAudio::sendFrame(const vector<Point>& points) {
 
 bool DacAudio::setPointsPerSecond(uint32_t pps) {
     auto settings = currentSettings();
-    uint32_t targetSampleRate = pps * settings.numOutputChannels;
+    uint32_t targetSampleRate = pps;// * settings.numOutputChannels;
 
     // Find the closest valid sample rate to the target...
     // TODO: If there is no exact match we should indicate this to the user somehow?
@@ -180,7 +184,7 @@ bool DacAudio::setPointsPerSecond(uint32_t pps) {
         }
     }
 
-    settings.sampleRate = 48000; //closestRate;
+    settings.sampleRate = closestRate;
     close();
     bool res = setup(settings);
     return res;
