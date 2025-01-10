@@ -52,7 +52,7 @@ void Laser::setDac(std::shared_ptr<DacBase>  newdac){
         newdac->maxLatencyMS = maxLatencyMS;
         dacLabel = dac->getId();
         // dacAlias = dac->getAlias();
-        armed = false; // automatically calls setArmed because of listener on parameter
+        armed = true; // automatically calls setArmed because of listener on parameter
     }
 }
 
@@ -164,14 +164,13 @@ void Laser :: init() {
     armed.addListener(this, &ofxLaser::Laser::setDacArmed);
     pps.addListener(this, &Laser::ppsChanged);
     colourChangeShift.addListener(this, &Laser::colourShiftChanged);
-    
  
     dac->setPointsPerSecond(pps);
     // error checking on blank shift for older config files
     if(colourChangeShift<0) colourChangeShift = 0;
     
-    
-    armed = false;
+
+    armed = true;
     
     
     ofAddListener(params.parameterChangedE(), this, &Laser::paramsChanged);
