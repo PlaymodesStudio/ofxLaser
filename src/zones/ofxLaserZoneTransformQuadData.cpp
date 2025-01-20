@@ -192,7 +192,7 @@ void ZoneTransformQuadData :: setDstCorners(glm::vec2 topleft, glm::vec2 toprigh
 }
 
 void ZoneTransformQuadData :: setDefault() {
-    setDst(ofRectangle(192,192,416,224));
+    setDst(ofRectangle(0,0,800,800));
 }
 
 bool ZoneTransformQuadData :: moveHandle(int handleindex, glm::vec2 newpos, bool lockSquare) {
