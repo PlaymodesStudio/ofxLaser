@@ -631,6 +631,7 @@ inline bool DacEtherDream::waitForAck(char command) {
 
                 logNotice("INVALID COMMAND : " + ofToString(command));
                 //logData();
+                responseThreaded.status.playback_state = ETHERDREAM_PLAYBACK_IDLE;
                 
                 failed = true;
                 
