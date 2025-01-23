@@ -707,7 +707,7 @@ bool ManagerBase::loadSettings() {
     // if the json didn't load then this shouldn't do anything
     ofDeserialize(json, params);
   
-
+    /*
     
     if(!beamZoneContainer.deserialize(json["beamzones"])) {
         // try old format
@@ -715,6 +715,7 @@ bool ManagerBase::loadSettings() {
     }
     canvasTarget.deserialize(json["canvastarget"]);
     
+    */
     
     // reset the global brightness setting, despite what was in the settings.
     globalBrightness = 1.0;
@@ -801,8 +802,10 @@ bool ManagerBase::saveSettings() {
     ofJson json;
     ofSerialize(json, params);
 
+    /*
     beamZoneContainer.serialize(json["beamzones"]);
     canvasTarget.serialize(json["canvastarget"]);
+    */
     
     bool savesuccess = ofSavePrettyJson("ofxLaser/laserSettings.json", json);
     
