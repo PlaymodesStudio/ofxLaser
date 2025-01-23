@@ -1508,7 +1508,8 @@ bool Laser::loadSettings(){
     //ofDeserialize(json, visual3DParams);
     bool success = maskManager.deserialize(json);
     
-    clearOutputZones(); 
+    /*
+    clearOutputZones();
     
     ofJson zoneNumJson = json["laserzones"];
     
@@ -1559,6 +1560,7 @@ bool Laser::loadSettings(){
             }
         }
     }
+    */
     
     paused = false;
     
@@ -1581,6 +1583,7 @@ bool Laser::saveSettings(){
     ofJson json;
     ofSerialize(json, params);
     
+    /*
     // save the list of zones so we know which zone files to load
     vector<string>laserzoneuids;
     vector<string>laseraltzoneuids;
@@ -1597,9 +1600,11 @@ bool Laser::saveSettings(){
 
     
     maskManager.serialize(json);
+    */
     // Save the laser settings
     bool success = ofSavePrettyJson(savePath + "laser"+ ofToString(laserIndex) +".json", json);
     
+    /*
     for(OutputZone* laserZone : outputZones) {
         ofJson laserzonejson;
         laserZone->serialize(laserzonejson);
@@ -1619,7 +1624,7 @@ bool Laser::saveSettings(){
         }
         
     }
-    
+    */
     
     
     lastSaveTime = ofGetElapsedTimef();
@@ -1666,7 +1671,7 @@ void Laser :: serialize(ofJson& json) {
 //    json["laserzones"] = laserzoneuids;
 //    json["laseraltzones"] = laseraltzoneuids;
 
-    
+    /*
     maskManager.serialize(json);
     
     ofJson& zonejson = json["outputzones"];
@@ -1676,7 +1681,7 @@ void Laser :: serialize(ofJson& json) {
         zonejson.push_back(laserzonejson);
         
     }
-    
+    */
     
 }
 
@@ -1687,6 +1692,7 @@ bool Laser :: deserialize(ofJson& json) {
     
     ofDeserialize(json, params);
     //ofDeserialize(json, visual3DParams);
+    /*
     bool success = maskManager.deserialize(json);
     
     clearOutputZones();
@@ -1712,8 +1718,10 @@ bool Laser :: deserialize(ofJson& json) {
     paused = false;
     
     ignoreParamChange = false;
+     
+    */
     
-    if(json.empty() || (!success)) {
+    if(json.empty()) {
         return false;
     } else {
         return true;

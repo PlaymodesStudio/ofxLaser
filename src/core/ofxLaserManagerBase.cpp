@@ -838,9 +838,11 @@ void ManagerBase :: serialize(ofJson& json) {
     ofJson& jsonLaserSettings = json; // ["managersettings"];
     ofSerialize(jsonLaserSettings, params);
 
+    /*
     beamZoneContainer.serialize(jsonLaserSettings["beamzones"]);
     canvasTarget.serialize(jsonLaserSettings["canvas"]);
-
+    */
+     
     ofJson& jsonLasers = json["lasers"];
     for(size_t i= 0; i<lasers.size(); i++) {
         lasers[i]->serialize(jsonLasers[i]);
@@ -855,6 +857,8 @@ bool ManagerBase::deserialize(ofJson& json) {
     //cout << json.dump(3) << endl;
     
     ofDeserialize(json, params);
+    
+    /*
     if(json.contains("canvas")) {
         canvasTarget.deserialize(json["canvas"]);
     }
@@ -863,7 +867,7 @@ bool ManagerBase::deserialize(ofJson& json) {
         // try old format
         beamZoneContainer.deserialize(json["beamZones"]);
     }
- 
+     */
     
     
     ofJson& jsonLasers = json["lasers"];
