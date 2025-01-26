@@ -73,7 +73,7 @@ ManagerBase :: ManagerBase() : dacAssigner(*DacAssigner::instance()) {
 
 ManagerBase :: ~ManagerBase() {
 
-    saveSettings();
+    //saveSettings();
     
 }
 
@@ -102,7 +102,7 @@ void ManagerBase ::resetAllLasersToDefault() {
     setCanvasSize(800,800);
     createDefaultCanvasZone();
     
-    saveSettings();
+    //saveSettings();
     //outputZone
     
 }
@@ -174,7 +174,7 @@ bool ManagerBase :: deleteLaser(Laser* laser) {
     for(int i = 0; i<(int)lasers.size(); i++) {
         
         lasers[i]->laserIndex = i;
-        lasers[i]->saveSettings();
+        //lasers[i]->saveSettings();
         
     }
     
@@ -524,7 +524,7 @@ void ManagerBase:: update(){
     }
     
     if(settingsNeedSave && (ofGetElapsedTimef()-lastSaveTime>1)) {
-        saveSettings();
+        //saveSettings();
     }
     fillOn = false;
     strokeOn = true;
@@ -693,7 +693,7 @@ void ManagerBase::hideContentDuringTestPatternChanged(bool& state) {
     for(Laser* laser : lasers) {
         laser->hideContentDuringTestPattern = hideContentDuringTestPattern;
     }
-    saveSettings();
+    //saveSettings();
     
 }
 

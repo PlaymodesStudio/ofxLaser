@@ -259,7 +259,7 @@ void Laser::addZone(ZoneId zoneId, bool isAlternate) {
         return (a->getZoneId().getUid()<b->getZoneId().getUid());
     });
     
-    saveSettings();
+    //saveSettings();
     
 }
 
@@ -609,7 +609,7 @@ void Laser::update() {
     frameTimeHistoryOffset++;
     if(frameTimeHistoryOffset>=frameTimeHistorySize) frameTimeHistoryOffset = 0;
     
-    if(needsSave) saveSettings();
+    //if(needsSave) //saveSettings();
     
 }
 
@@ -1496,8 +1496,8 @@ void  Laser :: processPoints(float masterIntensity, bool offsetColours) {
 
 
 void Laser::paramsChanged(ofAbstractParameter& e){
-    if(ignoreParamChange) return;
-    else saveSettings();
+//    if(ignoreParamChange) return;
+//    else saveSettings();
 }
 
 
