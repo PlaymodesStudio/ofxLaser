@@ -418,7 +418,7 @@ inline bool DacEtherDream :: sendPointsToDac(){
 		
 	}
 	
-	if(dacCommand.size()>=100000) {
+	if(dacCommand.size()>=65535) {
 		ofLog(OF_LOG_ERROR, "ofxLaser::DacEtherDream - too many bytes to send! - " + ofToString(dacCommand.size()));
 	}
 	
