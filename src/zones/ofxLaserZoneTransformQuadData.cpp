@@ -99,7 +99,37 @@ bool ZoneTransformQuadData :: isAxisAligned() {
 
 ofPoint ZoneTransformQuadData::getWarpedPoint(const ofPoint& p){
     
-    return quadWarper.getWarpedPoint(p, useHomography&&!isConvex);
+    // https://photonlexicon.com/forums/showthread.php/26099-geometric-correction-algorithm?p=335765#post335765
+    ofPoint pWarped = quadWarper.getWarpedPoint(p, useHomography&&!isConvex);
+    ofPoint pFinal;
+    pWarped.x = ofMap(pWarped.x, 0, 800, -1, 1);
+    pWarped.y = ofMap(pWarped.y, 0, 800, -1, 1);
+    pFinal = pWarped;
+    
+    // do shear
+    pFinal.x += shear[0] * pWarped.y;
+    pFinal.y += shear[1] * pWarped.x;
+
+    // do keystone
+    pFinal.x += keystone[0] * (pWarped.x * pWarped.y);
+    pFinal.y += keystone[1] * (pWarped.x * pWarped.y);
+
+    // do linearity
+    pFinal.x += linearity[0] * (pWarped.x * pWarped.x);
+    pFinal.y += linearity[1] * (pWarped.y * pWarped.y);
+
+    // do bow
+    pFinal.x += bow[0] * (pWarped.y * pWarped.y);
+    pFinal.y += bow[1] * (pWarped.x * pWarped.x);
+
+    // do pincushion
+    pFinal.x += pincushion[0] * (pWarped.x * pWarped.y * pWarped.y);
+    pFinal.y += pincushion[1] * (pWarped.y * pWarped.x * pWarped.x);
+
+    pFinal.x = ofMap(pFinal.x, -1, 1, 0, 800);
+    pFinal.y = ofMap(pFinal.y, -1, 1, 0, 800);
+    return pFinal;
+
     
 };
 
@@ -113,8 +143,35 @@ ofPoint ZoneTransformQuadData::getUnWarpedPoint(const ofPoint& p){
 
 ofxLaser::Point ZoneTransformQuadData::getWarpedPoint(const ofxLaser::Point& p){
     
- 
-    return  quadWarper.getWarpedPoint(p, useHomography&&!isConvex);
+    ofxLaser::Point pWarped = quadWarper.getWarpedPoint(p, useHomography&&!isConvex);
+    ofxLaser::Point pFinal;
+    pWarped.x = ofMap(pWarped.x, 0, 800, -1, 1);
+    pWarped.y = ofMap(pWarped.y, 0, 800, -1, 1);
+    pFinal = pWarped;
+
+    // do shear
+    pFinal.x += shear[0] * pWarped.y;
+    pFinal.y += shear[1] * pWarped.x;
+
+    // do keystone
+    pFinal.x += keystone[0] * (pWarped.x * pWarped.y);
+    pFinal.y += keystone[1] * (pWarped.x * pWarped.y);
+
+    // do linearity
+    pFinal.x += linearity[0] * (pWarped.x * pWarped.x);
+    pFinal.y += linearity[1] * (pWarped.y * pWarped.y);
+
+    // do bow
+    pFinal.x += bow[0] * (pWarped.y * pWarped.y);
+    pFinal.y += bow[1] * (pWarped.x * pWarped.x);
+
+    // do pincushion
+    pFinal.x += pincushion[0] * (pWarped.x * pWarped.y * pWarped.y);
+    pFinal.y += pincushion[1] * (pWarped.y * pWarped.x * pWarped.x);
+
+    pFinal.x = ofMap(pFinal.x, -1, 1, 0, 800);
+    pFinal.y = ofMap(pFinal.y, -1, 1, 0, 800);
+    return pFinal;
 
     
 };

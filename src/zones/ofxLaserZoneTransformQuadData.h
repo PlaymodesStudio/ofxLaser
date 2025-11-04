@@ -63,6 +63,11 @@ class ZoneTransformQuadData : public ZoneTransformBase {
     virtual glm::vec2 getCentre() override;
 
     ofParameter<bool>useHomography;
+    float shear[2] = {0, 0};
+    float keystone[2] = {0, 0};
+    float linearity[2] = {0, 0};
+    float bow[2] = {0, 0};
+    float pincushion[2] = {0, 0};
     
     vector<glm::vec2*> getCornerPoints();
   
