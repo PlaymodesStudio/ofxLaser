@@ -135,6 +135,7 @@ void DacManagerLaserDockNet :: threadedFunction() {
     
                        if(lock()) {
                             dacStatusById[id] = status;
+                            dacStatusById[id].lastUpdateTime = ofGetElapsedTimef();
                             dacsChanged = true;
                             unlock();
                         }

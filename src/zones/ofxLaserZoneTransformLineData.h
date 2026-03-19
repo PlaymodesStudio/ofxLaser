@@ -9,7 +9,6 @@
 #pragma once
 
 #include "ofxLaserZoneTransformBase.h"
-#include "ofxLaserDragHandle.h"
 #include "ofxLaserPoint.h"
 #include "ofxLaserFactory.h"
 #include "ofxLaserBezierNode.h"

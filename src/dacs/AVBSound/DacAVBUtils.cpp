@@ -17,17 +17,17 @@ int getPreferredSampleRateForDevice(const ofSoundDevice& device) {
     RtAudio audio;
     RtAudio::DeviceInfo info;
     
-    try {
-        info = audio.getDeviceInfo(device.deviceID);
-    } catch (RtAudioError& e) {
-        ofLogError() << "SoundInputManager :: getPreferredSampleRateForDevice : Failed to get device info: " << e.getMessage();
-        return -1;
-    }
-    
-    if (!info.probed || device.sampleRates.empty()) {
-        ofLogError() << "SoundInputManager :: getPreferredSampleRateForDevice : Device info could not be probed or has no sample rates.";
-        return -1;
-    }
+//    try {
+//        info = audio.getDeviceInfo(device.deviceID);
+//    } catch (RtAudioErrorType& e) {
+//        ofLogError() << "SoundInputManager :: getPreferredSampleRateForDevice : Failed to get device info: " << e.getMessage();
+//        return -1;
+//    }
+//    
+//    if (!info.probed || device.sampleRates.empty()) {
+//        ofLogError() << "SoundInputManager :: getPreferredSampleRateForDevice : Device info could not be probed or has no sample rates.";
+//        return -1;
+//    }
     
     int preferredRate = info.preferredSampleRate;
     

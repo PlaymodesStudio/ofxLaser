@@ -416,6 +416,14 @@ bool Shape :: clipToRectangle() {
             anyinside = true;
             break;
         }
+        if(((p.x >= rect.getLeft() && p.x <= rect.getRight()) &&
+           (p.y == rect.getTop() || p.y == rect.getBottom())) ||
+            ((p.y >= rect.getTop() && p.y <= rect.getBottom()) &&
+            (p.x == rect.getLeft() || p.x == rect.getRight()))){
+                anyinside = true;
+                break;
+            }
+        
         lastpoint = p;
         
     }
@@ -441,12 +449,19 @@ bool Shape :: clipToRectangle() {
         glm::vec3& p = vertices.at(i%vertices.size());
        
         // if it's outside the rectangle
+        bool isInside = pointInsideRect(p, rect);
+        if(((p.x >= rect.getLeft() && p.x <= rect.getRight()) &&
+           (p.y == rect.getTop() || p.y == rect.getBottom())) ||
+            ((p.y >= rect.getTop() && p.y <= rect.getBottom()) &&
+            (p.x == rect.getLeft() || p.x == rect.getRight()))){
+            isInside = true;
+            }
         
-        if(!pointInsideRect(p, rect)) { // if we're outside
+        if(!isInside) { // if we're outside
             
             // and we're not already outside, or else this line passes through
             bool leavesRect = (!outside);
-            bool intersectsRect = ((i>0)&&(rect.intersects(previousPoint, p)) &&(getColourAtPoint(i)!=ofColor::black) &&(getColourAtPoint(i-1)!=ofColor::black) );
+            bool intersectsRect = ((i>0)&&(rect.intersects(previousPoint, p)) &&(getColourAtPoint(i)!=ofFloatColor::black) &&(getColourAtPoint(i-1)!=ofFloatColor::black) );
             
           //  ofLogNotice("Intersects rect ") << intersectsRect << "  leaves rect : " << leavesRect;
 

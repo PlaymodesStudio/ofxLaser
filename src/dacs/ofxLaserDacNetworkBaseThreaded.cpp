@@ -6,6 +6,7 @@
 //
 
 #include "ofxLaserDacNetworkBaseThreaded.h"
+#include "unistd.h"
 
 using namespace ofxLaser;
 

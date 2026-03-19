@@ -9,7 +9,6 @@
 #include "ofMain.h"
 #include "ofxClipper.h"
 #include "ofxLaserFactory.h"
-#include "ofxSvgExtra.h"
 
 namespace ofxLaser {
 
@@ -43,13 +42,6 @@ class Graphic {
 	}
 
 	
-   void addSvg(string filename, bool optimise = true, bool subtractFills = true) {
-        addSvgFromFile(filename, optimise, subtractFills);
-    }
-        
-    void addSvgFromFile(string filename, bool optimise = true, bool subtractFills = true);
-    void addSvgFromString(string data, bool optimise = true, bool subtractFills = true);
-    void addSvg(ofxSVGExtra& svg, bool optimise = true, bool subtractFills = true);
 	void addPolyline(const ofPolyline* poly, ofColor colour, bool filled = true, bool useTransform = true){
 		addPolyline(*poly, colour, filled, useTransform);
 	}
